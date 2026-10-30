@@ -725,7 +725,7 @@ function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp
 
 var SCHEMA=3,SYNCING=false;
 function seed(){
-  return {v:SCHEMA,lang:'ar',view:'home',settings:{focus:25,brk:5,goal:120},subjects:[],tasks:[],logs:[],reviews:[],theme:'',layout:'auto',onboarded:false};
+  return {v:SCHEMA,lang:'ar',view:'home',settings:{focus:25,brk:5,goal:120},subjects:[],tasks:[],logs:[],reviews:[],lists:[],theme:'',layout:'auto',onboarded:false};
 }
 /* ---- state migration: every load (and every import) passes through here, so old or damaged data can never break the UI ---- */
 function ext(a,b){for(var k in b)a[k]=b[k];return a}
@@ -744,7 +744,8 @@ function migrate(raw){
     k.pri=({high:1,med:1,low:1})[k.pri]?k.pri:'med';k.rem=/^\d{2}:\d{2}$/.test(k.rem||'')?k.rem:'';k.remLast=k.remLast||'';k.done=!!k.done;return k});
   o.logs=arr(o.logs).filter(function(l){return l&&dre.test(l.date||'')&&+l.min>0}).map(function(l){l=ext({},l);l.id=l.id||uid();l.min=+l.min;l.subj=l.subj||'';return l});
   o.reviews=arr(o.reviews).filter(function(r){return r&&r.name&&+r.hours>0&&+r.days>0}).map(function(r,i){
-    r=ext({},r);r.id=r.id||uid();r.hours=+r.hours;r.days=+r.days;r.start=dre.test(r.start||'')?r.start:today();r.ext=+r.ext||0;r.doneH=+r.doneH||0;r.dd=r.dd&&typeof r.dd==='object'?r.dd:{};r.color=r.color||COLORS[i%COLORS.length];return r});
+    r=ext({},r);r.id=r.id||uid();r.hours=+r.hours;r.days=+r.days;r.start=dre.test(r.start||'')?r.start:today();r.ext=+r.ext||0;r.doneH=+r.doneH||0;r.dd=r.dd&&typeof r.dd==='object'?r.dd:{};r.color=r.color||COLORS[i%COLORS.length];r.kind=({misc:1,hw:1})[r.kind]?r.kind:'rev';return r});
+  o.lists=arr(o.lists).filter(function(l){return l&&l.name}).map(function(l){return {id:l.id||uid(),kind:l.kind==='hw'?'hw':'misc',name:String(l.name),done:!!l.done}});
   o.theme=o.theme==='dark'||o.theme==='light'?o.theme:'';
   o.layout=['phone','tablet','laptop'].indexOf(o.layout)>-1?o.layout:'auto';
   o.taskSort=o.taskSort==='manual'?'manual':'auto';
@@ -955,8 +956,15 @@ function rvInfo(r){
   var el=Math.round((new Date(today()+'T00:00:00')-new Date(r.start+'T00:00:00'))/864e5);if(el<0)el=0;
   var left=r.days+(r.ext||0)-el,rem=Math.max(0,r.hours-(r.doneH||0)),dn=!!(r.day&&r.day.date===today());
   return {left:Math.max(0,left),rem:rem,done:dn,share:dn?r.day.amt:Math.min(rem,rem/Math.max(1,left)),fin:rem<=0&&!dn,late:left<=0&&rem>0,el:el}}
-function reviewCard(){
-  var L=S.reviews||[];if(!L.length)return '';
+function reviewCard(){return ['rev','misc','hw'].map(reviewCardK).join('')+listCard('misc')+listCard('hw')}
+function listCard(kd){
+  var L=(S.lists||[]).filter(function(x){return x.kind===kd});if(!L.length)return '';
+  var nd=L.filter(function(x){return x.done}).length;
+  var rows=L.map(function(x){return '<div class="trow'+(x.done?' done':'')+'"><button class="chk" role="checkbox" aria-checked="'+x.done+'" aria-label="'+esc(x.name)+'" data-a="litog" data-id="'+x.id+'">'+ic('check',16)+'</button><div class="grow"><div class="ttl">'+esc(x.name)+'</div></div><button class="x" data-a="lidel" data-id="'+x.id+'" aria-label="×">'+ic('trash',18)+'</button></div>'}).join('');
+  return sec('split','<div class="sh"><h2>'+rvK(kd).title+'</h2><div class="row" style="gap:4px">'+(nd?'<button class="link" data-a="licln" data-id="'+kd+'">'+pkL('تنظيف المنجزة','Clear completed')+' ('+nd+')</button>':'')+'<button class="x" data-a="liadd" data-id="'+kd+'" aria-label="+">'+ic('plus',20)+'</button></div></div><div class="grp">'+rows+'</div><div class="small muted num">'+nd+'/'+L.length+' '+pkL('منجز','done')+'</div>')}
+function tpRow(kd){return '<input type="text" class="tpIn" maxlength="80" placeholder="'+esc(rvK(kd).ph)+'" autocomplete="off" aria-label="'+esc(rvK(kd).name)+'">'}
+function reviewCardK(kd){
+  var L=(S.reviews||[]).filter(function(r){return (r.kind||'rev')===kd});if(!L.length)return '';
   var rows=L.map(function(r){
     var i=rvInfo(r),c=r.color||COLORS[0];
     return '<div class="sprow'+(i.done?' done':'')+'" style="--c:'+c+'"><i class="dot"></i>'+
@@ -964,7 +972,7 @@ function reviewCard(){
      (i.fin?'<span class="small" style="color:var(--ok);font-weight:700">'+t('allDone')+'</span>':
       '<span class="big2 num">'+fmtH(i.share)+'</span><button class="chk" role="checkbox" aria-checked="'+i.done+'" aria-label="'+esc(r.name)+'" data-a="rvdone" data-id="'+r.id+'">'+ic('check',16)+'</button>')+'</div>'}).join('');
   var nf=L.filter(function(r){return rvInfo(r).fin}).length;
-  return sec('split','<div class="sh"><h2>'+t('focusRev')+'</h2>'+(nf?'<button class="link" data-a="cleanrv">'+pkL('تنظيف المنجزة','Clear completed')+' ('+nf+')</button>':'')+'</div><div class="grp">'+rows+'</div><div class="small muted">'+t('splitHint')+'</div>')}
+  return sec('split','<div class="sh"><h2>'+rvK(kd).title+'</h2>'+(nf?'<button class="link" data-a="cleanrv" data-id="'+kd+'">'+pkL('تنظيف المنجزة','Clear completed')+' ('+nf+')</button>':'')+'</div><div class="grp">'+rows+'</div><div class="small muted">'+t('splitHint')+'</div>')}
 function findRv(id){return (S.reviews||[]).filter(function(x){return x.id===id})[0]}
 
 function filterBar(){
@@ -1144,13 +1152,19 @@ function sheetHtml(k){
    '<button class="btn" type="submit">'+pkL('ابدأ','Start')+'</button><button type="button" class="btn ghost" data-a="wdef">'+t('addDef')+'</button></form>';
   if(k==='subjtype')return '<h2>'+t('addWhat')+'</h2><div style="display:flex;flex-direction:column;gap:12px;margin-top:6px">'+
    '<button type="button" class="pick" data-a="pick" data-id="subject"><b>'+t('regStudy')+'</b><span>'+t('regHint')+'</span></button>'+
-   '<button type="button" class="pick" data-a="pick" data-id="review"><b>'+t('focusRev')+'</b><span>'+t('revHint')+'</span></button></div>';
-  if(k==='review'){var er=UI.editRv?findRv(UI.editRv):null,dl=er?Math.max(1,rvInfo(er).left||1):'';
-   return '<h2>'+t(er?'editRev':'focusRev')+'</h2><form id="fRev"><label class="f">'+t('chName')+'<input type="text" id="rvName" required maxlength="40" value="'+esc(er?er.name:'')+'" placeholder="'+esc(t('chPh'))+'" autocomplete="off"></label>'+
-   '<div class="g2"><label class="f">'+t('rvHours')+'<input type="number" id="rvHours" required min="0.5" max="500" step="0.5" value="'+(er?er.hours:'')+'" inputmode="decimal"></label>'+
-   '<label class="f">'+t('rvDays')+'<input type="number" id="rvDays" required min="1" max="365" value="'+dl+'" inputmode="numeric"></label></div>'+
+   '<button type="button" class="pick" data-a="pickkind" data-id="rev"><b>'+rvK('rev').title+'</b><span>'+rvK('rev').hint+'</span></button>'+
+   '<button type="button" class="pick" data-a="pickkind" data-id="misc"><b>'+rvK('misc').title+'</b><span>'+rvK('misc').hint+'</span></button>'+
+   '<button type="button" class="pick" data-a="pickkind" data-id="hw"><b>'+rvK('hw').title+'</b><span>'+rvK('hw').hint+'</span></button></div>';
+  if(k==='topics'){var lk=UI.lkKind==='hw'?'hw':'misc';
+   return '<h2>'+rvK(lk).title+'</h2><form id="fTopics"><div id="tpRows" style="display:flex;flex-direction:column;gap:10px">'+tpRow(lk)+'</div>'+
+   '<button type="button" class="addp" data-a="addtopic">+ '+pkL(lk==='hw'?'إضافة واجب آخر':'إضافة موضوع آخر',lk==='hw'?'Add another homework':'Add another topic')+'</button>'+
+   '<button class="btn" type="submit">'+t('add')+'</button></form>'}
+  if(k==='review'){var er=UI.editRv?findRv(UI.editRv):null,dl=er?Math.max(1,rvInfo(er).left||1):'',kk=rvK(er?er.kind:UI.rvKind);
+   return '<h2>'+(er?pkL('تعديل','Edit')+' · ':'')+kk.title+'</h2><form id="fRev"><label class="f">'+kk.name+'<input type="text" id="rvName" required maxlength="40" value="'+esc(er?er.name:'')+'" placeholder="'+esc(kk.ph)+'" autocomplete="off"></label>'+
+   '<div class="g2"><label class="f">'+kk.hours+'<input type="number" id="rvHours" required min="0.5" max="500" step="0.5" value="'+(er?er.hours:'')+'" inputmode="decimal"></label>'+
+   '<label class="f">'+kk.days+'<input type="number" id="rvDays" required min="1" max="365" value="'+dl+'" inputmode="numeric"></label></div>'+
    '<div class="rvprev" id="rvPrev">'+rvPrevTxt(er?er.hours:0,dl)+'</div>'+
-   '<button class="btn" type="submit">'+t(er?'saveBtn':'add')+'</button>'+(er?'<button class="btn ghost" type="button" data-a="delrv">'+t('delRv')+'</button>':'')+'</form>'}
+   '<button class="btn" type="submit">'+t(er?'saveBtn':'add')+'</button>'+(er?'<button class="btn ghost" type="button" data-a="delrv">'+pkL('حذف','Delete')+'</button>':'')+'</form>'}
   if(k==='profile')return '<h2>'+t('profile')+'</h2><form id="fProf"><div class="pcenter"><div class="av xl" id="pAv">'+avInner(UI.pPhoto,profName())+'</div>'+
    '<div class="prow2"><label class="btn ghost" for="pFile" id="pAddL">'+t(UI.pPhoto?'changePhoto':'addPhoto')+'</label><input type="file" id="pFile" accept="image/*">'+
    '<button type="button" class="btn ghost" data-a="delphoto" style="height:44px;font-size:calc(14px*var(--fs,1));padding-inline:18px">'+t('delPhoto')+'</button></div></div>'+
@@ -1189,6 +1203,10 @@ function sheetHtml(k){
    '<label class="f">'+t('dailyGoal')+'<input type="number" id="sGoal" min="10" max="900" step="5" value="'+S.settings.goal+'" inputmode="numeric"></label>'+
    '<button class="btn" type="submit">'+t('close')+'</button></form>';
   return ''}
+function rvK(k){
+  if(k==='misc')return {title:pkL('مواضيع متفرقة','Misc topics'),name:pkL('اسم الموضوع','Topic name'),ph:pkL('مثال: موضوع التعبير','e.g. Essay topic'),hours:pkL('مجموع الوقت المطلوب (ساعات)','Total time needed (hours)'),days:pkL('عدد الأيام المتاحة للموضوع','Days available for the topic'),hint:pkL('موضوع واحد: وقته يُقسَّم على الأيام المتاحة وتشوف حصتك اليومية','One topic: its time is divided across the available days to give your daily share')};
+  if(k==='hw')return {title:pkL('الواجبات المنزلية','Homework'),name:pkL('اسم الواجب','Homework name'),ph:pkL('مثال: واجب الرياضيات','e.g. Math homework'),hours:pkL('مجموع وقت الواجب (ساعات)','Total homework time (hours)'),days:pkL('عدد الأيام المتاحة للتسليم','Days until it is due'),hint:pkL('واجب واحد: وقته يُقسَّم على الأيام المتاحة وتشوف حصتك اليومية','One assignment: its time is divided across the available days to give your daily share')};
+  return {title:t('focusRev'),name:t('chName'),ph:t('chPh'),hours:t('rvHours'),days:t('rvDays'),hint:t('revHint')}}
 function rvPrevTxt(h,d){h=parseFloat(h);d=parseInt(d,10);return t('rvPrev')+': '+(h>0&&d>0?fmtH(h/d):'—')}
 function openSheet(k){
   if(k==='profile')UI.pPhoto=(S.profile&&S.profile.photo)||'';
@@ -1958,6 +1976,18 @@ document.addEventListener('click',function(e){
   else if(a==='print'){doPrint()}
   else if(a==='install'){doInstall()}
   else if(a==='fullscr'){if(isFull())exitFull();else enterFull();setTimeout(syncFull,250)}
+  else if(a==='pickkind'){UI.editId='';UI.editRv='';if(id==='rev'){UI.rvKind='rev';openSheet('review')}else{UI.lkKind=id;openSheet('topics')}}
+  else if(a==='addtopic'){var tr=document.getElementById('tpRows');tr.insertAdjacentHTML('beforeend',tpRow(UI.lkKind==='hw'?'hw':'misc'));tr.lastElementChild.focus();UI.dirty=true}
+  else if(a==='liadd'){UI.lkKind=id;openSheet('topics')}
+  else if(a==='litog'){var li=(S.lists||[]).filter(function(x){return x.id===id})[0];if(!li)return;li.done=!li.done;render()}
+  else if(a==='lidel'){
+    var lx=(S.lists||[]),lj=-1,lo=null;lx.forEach(function(x,i){if(x.id===id){lj=i;lo=x}});if(!lo)return;
+    S.lists=lx.filter(function(x){return x.id!==id});render();
+    showUndo(pkL('تم الحذف','Deleted'),function(){S.lists.splice(Math.min(lj,S.lists.length),0,lo);render()})}
+  else if(a==='licln'){
+    var la=(S.lists||[]).slice(),lg=la.filter(function(x){return x.done&&x.kind===id});if(!lg.length)return;
+    S.lists=la.filter(function(x){return lg.indexOf(x)<0});render();
+    showUndo(pkL('تم تنظيف '+lg.length+' منجز','Cleared '+lg.length+' completed'),function(){S.lists=(S.lists||[]).concat(lg);render()})}
   else if(a==='pick'){UI.editId='';UI.editRv='';openSheet(id)}
   else if(a==='editrv'){UI.editRv=id;openSheet('review')}
   else if(a==='delrv'){
@@ -2014,8 +2044,8 @@ document.addEventListener('click',function(e){
       if(tk)showUndo(pkL('تم حذف المهمة','Task deleted'),function(){S.tasks.splice(Math.min(ix,S.tasks.length),0,tk);render()})},260)}
   else if(a==='undo'){var uf=UNDO;UNDO=null;document.getElementById('toast').classList.remove('show');if(uf)uf()}
   else if(a==='cleanrv'){
-    var all0=(S.reviews||[]).slice(),gone=all0.filter(function(r){return rvInfo(r).fin});if(!gone.length)return;
-    S.reviews=all0.filter(function(r){return !rvInfo(r).fin});render();
+    var all0=(S.reviews||[]).slice(),gone=all0.filter(function(r){return rvInfo(r).fin&&(!id||(r.kind||'rev')===id)});if(!gone.length)return;
+    S.reviews=all0.filter(function(r){return gone.indexOf(r)<0});render();
     showUndo(pkL('تم تنظيف '+gone.length+' من المراجعات المنجزة','Cleared '+gone.length+' completed review(s)'),function(){S.reviews=(S.reviews||[]).concat(gone);render()})}
   else if(a==='ics'){exIcs()}
   else if(a==='wdef'){add6();S.onboarded=true;S.view='subjects';closeSheet();render(true)}
@@ -2100,7 +2130,12 @@ document.addEventListener('submit',function(e){
     if(!rn||!(rh>0)||!(rd>0))return;rd=Math.min(365,rd);S.reviews=S.reviews||[];
     var re0=UI.editRv?findRv(UI.editRv):null;
     if(re0){re0.name=rn;re0.hours=rh;re0.days=rd;re0.start=today();re0.ext=0;re0.chk=today();re0.dd={}}
-    else S.reviews.push({id:uid(),name:rn,hours:rh,days:rd,start:today(),chk:today(),dd:{},ext:0,doneH:0,color:COLORS[S.reviews.length%COLORS.length]});
+    else S.reviews.push({id:uid(),name:rn,hours:rh,days:rd,start:today(),chk:today(),dd:{},ext:0,doneH:0,kind:UI.rvKind||'rev',color:COLORS[S.reviews.length%COLORS.length]});
+    closeSheet();render()}
+  else if(id==='fTopics'){
+    var tk=UI.lkKind==='hw'?'hw':'misc',tn=[].map.call(document.querySelectorAll('#tpRows .tpIn'),function(i){return i.value.trim()}).filter(Boolean);
+    if(!tn.length)return;S.lists=S.lists||[];
+    tn.forEach(function(n){S.lists.push({id:uid(),kind:tk,name:n,done:false})});
     closeSheet();render()}
   else if(id==='fSet'){closeSheet()}
   else if(id==='fWelcome'){
@@ -2187,6 +2222,10 @@ document.addEventListener('keydown',function(e){
     return}
 });
 document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&e.target.classList&&e.target.classList.contains('tpIn')){
+    e.preventDefault();var rs=[].slice.call(document.querySelectorAll('#tpRows .tpIn')),ix=rs.indexOf(e.target);
+    if(ix<rs.length-1)rs[ix+1].focus();else if(e.target.value.trim()){var b=document.querySelector('[data-a=addtopic]');if(b)b.click()}
+    return}
   if(e.key==='Escape'&&UI.sheet)closeSheetSafe();
   else if(e.key==='Enter'&&e.target.id==='tQ'){e.preventDefault();e.target.blur()}});
 window.addEventListener('resize',placeInd);
