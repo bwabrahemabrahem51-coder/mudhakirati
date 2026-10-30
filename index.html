@@ -498,6 +498,18 @@ input[type=email]:focus,input[type=password]:focus{outline:none;border-color:var
 .calg button{height:40px;border-radius:50%;border:0;background:none;color:var(--ink);font-weight:600;font-size:calc(14px*var(--fs,1))}
 .calg button.td{box-shadow:inset 0 0 0 1.5px var(--accent)}
 .calg button.sel{background:var(--accent);color:var(--accent-ink);box-shadow:none}
+.tpd{direction:ltr;display:flex;align-items:center;justify-content:center;gap:14px;background:var(--soft);border-radius:24px;padding:16px 12px;margin-bottom:14px}
+.tpd .tv{font-family:var(--f-display);font-weight:700;font-size:calc(52px*var(--fs,1));line-height:1;letter-spacing:-.02em;color:var(--accent)}
+.tpd .ap{display:flex;flex-direction:column;gap:6px}
+.tpd .ap button{height:36px;min-width:52px;padding:0 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font-weight:700;font-size:calc(14px*var(--fs,1))}
+.tpd .ap button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tpl{font-size:calc(12.5px*var(--fs,1));color:var(--muted);font-weight:700;margin:4px 2px 8px}
+.tpg{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-bottom:12px;direction:ltr}
+.tpg button{height:44px;border-radius:14px;border:0;background:var(--bg);color:var(--ink);font-weight:600;font-size:calc(15px*var(--fs,1))}
+.tpg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
+.tpm{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:14px;direction:ltr}
+.tpm button{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:var(--bg);font-weight:700;font-size:calc(20px*var(--fs,1));display:grid;place-items:center;padding:0}
+.tpm span{min-width:110px;text-align:center;color:var(--muted);font-size:calc(13px*var(--fs,1));font-weight:600}
 @media (min-width:700px){.pksheet{bottom:auto;top:50%;border-radius:28px;transform:translateY(-46%);opacity:0;width:calc(100% - 48px);max-width:440px;transition:transform .35s,opacity .3s,visibility 0s .35s}.pksheet.open{transform:translateY(-50%);opacity:1}}
 
 .lay{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
@@ -729,7 +741,7 @@ function migrate(raw){
     return s});
   o.tasks=arr(o.tasks).filter(function(k){return k&&k.title}).map(function(k){
     k=ext({},k);k.id=k.id||uid();k.title=String(k.title);k.subj=k.subj||'';k.due=dre.test(k.due||'')?k.due:'';
-    k.pri=({high:1,med:1,low:1})[k.pri]?k.pri:'med';k.done=!!k.done;return k});
+    k.pri=({high:1,med:1,low:1})[k.pri]?k.pri:'med';k.rem=/^\d{2}:\d{2}$/.test(k.rem||'')?k.rem:'';k.remLast=k.remLast||'';k.done=!!k.done;return k});
   o.logs=arr(o.logs).filter(function(l){return l&&dre.test(l.date||'')&&+l.min>0}).map(function(l){l=ext({},l);l.id=l.id||uid();l.min=+l.min;l.subj=l.subj||'';return l});
   o.reviews=arr(o.reviews).filter(function(r){return r&&r.name&&+r.hours>0&&+r.days>0}).map(function(r,i){
     r=ext({},r);r.id=r.id||uid();r.hours=+r.hours;r.days=+r.days;r.start=dre.test(r.start||'')?r.start:today();r.ext=+r.ext||0;r.doneH=+r.doneH||0;r.dd=r.dd&&typeof r.dd==='object'?r.dd:{};r.color=r.color||COLORS[i%COLORS.length];return r});
@@ -785,6 +797,7 @@ function taskRow(k){
    '<div class="grow" data-a="edittask" data-id="'+k.id+'" style="cursor:pointer"><div class="ttl">'+esc(k.title)+'</div><div class="meta">'+
    (s?'<span class="sp" style="--c:'+s.color+'"><i></i>'+esc(s.name)+'</span>':'')+
    (k.due?'<span class="num'+(late?' late':'')+'">'+dueLabel(k.due)+'</span>':'')+
+   (k.rem&&!k.done?'<span class="num">'+fmtTime12(k.rem)+'</span>':'')+
    (k.pri==='high'&&!k.done?'<span class="pri">'+t('high')+'</span>':'')+
    '</div></div><button class="x" data-a="deltask" data-id="'+k.id+'" aria-label="×">'+ic('trash',18)+'</button></div>'}
 function byDue(a,b){var x=a.due||'9999',y=b.due||'9999';if(x!==y)return x<y?-1:1;var w={high:0,med:1,low:2};return w[a.pri]-w[b.pri]}
@@ -1158,6 +1171,7 @@ function sheetHtml(k){
    return '<h2>'+t(et?'editTask':'addTask')+'</h2><form id="fTask"><label class="f">'+t('taskTitle')+'<input type="text" id="tTitle" required maxlength="120" value="'+esc(et?et.title:'')+'" placeholder="'+esc(t('taskPh'))+'" autocomplete="off"></label>'+
    '<div class="g2"><label class="f">'+t('subject')+'<select id="tSubj">'+subjOpts(et?et.subj:TM.subj)+'</select></label><label class="f">'+t('due')+'<input type="date" id="tDue" value="'+(et?(et.due||''):(UI.presetDue||today()))+'"></label></div>'+
    '<label class="f">'+t('priority')+'<select id="tPri">'+['med','high','low'].map(function(v){return '<option value="'+v+'"'+((et?et.pri:'med')===v?' selected':'')+'>'+t(v)+'</option>'}).join('')+'</select></label>'+
+   '<label class="f">'+pkL('تذكير بالمهمة','Task reminder')+'<input type="time" id="tRem" data-opt="1" aria-label="'+esc(pkL('تذكير بالمهمة','Task reminder'))+'" value="'+(et&&et.rem?et.rem:'')+'"></label>'+
    '<button class="btn" type="submit">'+t(et?'saveBtn':'add')+'</button></form>'}
   if(k==='subject'){var es=UI.editId?subj(UI.editId):null;return '<h2>'+t(es?'editSubj':'newSubject')+'</h2><form id="fSubj"><label class="f">'+t('name')+'<input type="text" id="sName" required maxlength="40" value="'+esc(es?es.name:'')+'" placeholder="'+esc(t('subjPh'))+'" autocomplete="off"></label>'+
    '<label class="f">'+t('target')+'<input type="number" id="sTarget" min="0" max="60" step="0.5" value="'+(es?es.target:3)+'" inputmode="decimal"></label>'+
@@ -1265,18 +1279,45 @@ function pkDateOpen(inp,title){
     PK.el.querySelector('#cOk').onclick=function(){if(sel)inp.value=sel;pkSync(inp);pkClose()}}
   draw()}
 function pkSync(n){var b=n.previousElementSibling;if(!b||!b.classList.contains('pk'))return;
-  b.firstChild.textContent=n.tagName==='SELECT'?pkText(n):(n.value?fmtDateLong(n.value):pkL('بدون موعد','No date'))}
+  b.firstChild.textContent=n.tagName==='SELECT'?pkText(n):n.type==='time'?(!n.value&&n.getAttribute('data-opt')?pkL('بدون تذكير','No reminder'):fmtTime12(n.value||'18:00')):(n.value?fmtDateLong(n.value):pkL('بدون موعد','No date'))}
+function fmtTime12(v){var a=(v||'18:00').split(':'),h=+a[0]||0,m=+a[1]||0,pm=h>=12,h12=h%12||12;
+  return h12+':'+(m<10?'0':'')+m+' '+(pm?pkL('م','PM'):pkL('ص','AM'))}
+function pkTimeOpen(inp,title){
+  var a=(inp.value||'18:00').split(':'),H=+a[0]||0,M=+a[1]||0,pm=H>=12,h=H%12||12;
+  function p2(n){return (n<10?'0':'')+n}
+  function draw(){
+    var hs='',ms='',i;
+    for(i=1;i<=12;i++)hs+='<button type="button" data-h="'+i+'" aria-pressed="'+(i===h)+'">'+i+'</button>';
+    for(i=0;i<60;i+=5)ms+='<button type="button" data-m="'+i+'" aria-pressed="'+(i===M)+'">'+p2(i)+'</button>';
+    pkOpen('<div class="pkh"><h3>'+esc(title)+'</h3></div>'+
+      '<div class="tpd"><div class="tv num">'+h+':'+p2(M)+'</div><div class="ap"><button type="button" data-ap="am" aria-pressed="'+!pm+'">'+pkL('ص','AM')+'</button><button type="button" data-ap="pm" aria-pressed="'+pm+'">'+pkL('م','PM')+'</button></div></div>'+
+      '<div class="tpl">'+pkL('الساعة','Hour')+'</div><div class="tpg">'+hs+'</div>'+
+      '<div class="tpl">'+pkL('الدقيقة','Minute')+'</div><div class="tpg">'+ms+'</div>'+
+      '<div class="tpm"><button type="button" id="tMm" aria-label="-1">−</button><span>'+pkL('تعديل دقيقة بدقيقة','Fine tune')+'</span><button type="button" id="tMp" aria-label="+1">+</button></div>'+
+      '<div class="pkbtns"><button type="button" class="btn ghost" id="tCancel">'+pkL('إلغاء','Cancel')+'</button><button type="button" class="btn" id="tOk">'+pkL('موافق','OK')+'</button></div>'+
+      (inp.getAttribute('data-opt')?'<button type="button" class="btn ghost" id="tClr" style="width:100%;margin-top:10px;height:44px;font-size:calc(14px*var(--fs,1))">'+pkL('بدون تذكير','No reminder')+'</button>':''));
+    [].forEach.call(PK.el.querySelectorAll('[data-h]'),function(b){b.onclick=function(){h=+b.getAttribute('data-h');draw()}});
+    [].forEach.call(PK.el.querySelectorAll('[data-m]'),function(b){b.onclick=function(){M=+b.getAttribute('data-m');draw()}});
+    [].forEach.call(PK.el.querySelectorAll('[data-ap]'),function(b){b.onclick=function(){pm=b.getAttribute('data-ap')==='pm';draw()}});
+    PK.el.querySelector('#tMm').onclick=function(){M=(M+59)%60;draw()};
+    PK.el.querySelector('#tMp').onclick=function(){M=(M+1)%60;draw()};
+    PK.el.querySelector('#tCancel').onclick=pkClose;
+    var tc=PK.el.querySelector('#tClr');if(tc)tc.onclick=function(){inp.value='';inp.dispatchEvent(new Event('change',{bubbles:true}));pkSync(inp);pkClose()};
+    PK.el.querySelector('#tOk').onclick=function(){
+      var hh=(h%12)+(pm?12:0);inp.value=p2(hh)+':'+p2(M);
+      inp.dispatchEvent(new Event('change',{bubbles:true}));pkSync(inp);pkClose()}}
+  draw()}
 function fmtDateLong(k){return new Date(k+'T00:00:00').toLocaleDateString(loc(),{day:'numeric',month:'short',year:'numeric'})}
 function enhancePickers(){
   var root=document.getElementById('sheetBody');if(!root)return;
-  [].forEach.call(root.querySelectorAll('select,input[type=date]'),function(n){
+  [].forEach.call(root.querySelectorAll('select,input[type=date],input[type=time]'),function(n){
     if(n.classList.contains('nat'))return;
-    var lab=n.closest('label'),title=lab?lab.firstChild.textContent.trim():'';
+    var lab=n.closest('label'),title=lab?lab.firstChild.textContent.trim():(n.getAttribute('aria-label')||'');
     var b=document.createElement('button');b.type='button';b.className='pk';
     b.innerHTML='<span></span>'+ic('x',16);
     b.querySelector('svg').innerHTML='<path d="M6 9l6 6 6-6"/>';
     n.parentNode.insertBefore(b,n);n.classList.add('nat');pkSync(n);
-    b.addEventListener('click',function(e){e.preventDefault();if(n.tagName==='SELECT')pkSelectOpen(n,title);else pkDateOpen(n,title)})})}
+    b.addEventListener('click',function(e){e.preventDefault();if(n.tagName==='SELECT')pkSelectOpen(n,title);else if(n.type==='time')pkTimeOpen(n,title);else pkDateOpen(n,title)})})}
 /* closing by scrim / Esc asks first when the form has unsaved input; submit and explicit actions still call closeSheet() directly */
 function closeSheetSafe(){
   if(!UI.sheet)return;
@@ -1710,6 +1751,17 @@ function remCheck(){
   var d=new Date(),now=(d.getHours()<10?'0':'')+d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes();
   if(now>=(S.remind.time||'18:00')&&S.remind.last!==today()){S.remind.last=today();save();remind()}}
 setInterval(remCheck,20000);document.addEventListener('visibilitychange',remCheck);
+function taskRemCheck(){
+  if(!USER)return;
+  var d=new Date(),now=(d.getHours()<10?'0':'')+d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes(),td=today(),ch=false;
+  S.tasks.forEach(function(k){
+    if(k.done||!k.rem||k.remLast===td||k.due!==td||now<k.rem)return;
+    k.remLast=td;ch=true;
+    var m=k.title+' · '+fmtTime12(k.rem);
+    showToast(m);try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}
+    notify(t('app'),m,'task-'+k.id)});
+  if(ch)save()}
+setInterval(taskRemCheck,20000);document.addEventListener('visibilitychange',taskRemCheck);
 /* ---------- PWA install ---------- */
 var DEFER=null;
 function isStandalone(){return (window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true}
@@ -2000,10 +2052,11 @@ document.addEventListener('submit',function(e){
   e.preventDefault();var id=e.target.id;
   if(id==='fTask'){
     var ti=document.getElementById('tTitle').value.trim();if(!ti)return;
-    var tv={title:ti,subj:document.getElementById('tSubj').value,due:document.getElementById('tDue').value,pri:document.getElementById('tPri').value};
+    var tv={title:ti,subj:document.getElementById('tSubj').value,due:document.getElementById('tDue').value,pri:document.getElementById('tPri').value,rem:(document.getElementById('tRem')||{}).value||''};
     var et2=UI.editTaskId?S.tasks.filter(function(x){return x.id===UI.editTaskId})[0]:null;
-    if(et2){et2.title=tv.title;et2.subj=tv.subj;et2.due=tv.due;et2.pri=tv.pri}
-    else{S.tasks.push({id:uid(),title:tv.title,subj:tv.subj,due:tv.due,pri:tv.pri,done:false});UI.filter='open';UI.q='';UI.fs='';UI.fp='';UI.fd=''}
+    if(et2){if(et2.rem!==tv.rem||et2.due!==tv.due)et2.remLast='';et2.title=tv.title;et2.subj=tv.subj;et2.due=tv.due;et2.pri=tv.pri;et2.rem=tv.rem}
+    else{S.tasks.push({id:uid(),title:tv.title,subj:tv.subj,due:tv.due,pri:tv.pri,rem:tv.rem,remLast:'',done:false});UI.filter='open';UI.q='';UI.fs='';UI.fp='';UI.fd=''}
+    if(tv.rem)askPerm();
     closeSheet();render()}
   else if(id==='fSubj'){
     var n=document.getElementById('sName').value.trim();if(!n)return;
