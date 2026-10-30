@@ -1457,10 +1457,10 @@ function clearSession(){
 
 var AU={mode:'login',err:'',open:false,ok:false,email:''};
 /* ---------- Supabase (optional): password reset by email + cloud copy of the user's data. Leave url/key empty = local only ---------- */
-var SB={url:'',key:'',tok:'',uid:'',exp:0,rtok:'',t:0};
+var SB={url:'https://gojcpksvjhhulvmyzaxf.supabase.co',key:'sb_publishable_iaERyQvI9Rx-vrvTM-A0FA_8lKF0J3r',tok:'',uid:'',exp:0,rtok:'',t:0};
 function sbOn(){return !!(SB&&SB.url&&SB.key)}
 function sbReq(path,o){o=o||{};
-  var h={apikey:SB.key,'Content-Type':'application/json',Authorization:'Bearer '+(o.tok||SB.key)};if(o.prefer)h.Prefer=o.prefer;
+  var h={apikey:SB.key,'Content-Type':'application/json'};if(o.tok)h.Authorization='Bearer '+o.tok;if(o.prefer)h.Prefer=o.prefer;
   return fetch(SB.url+path,{method:o.m||'GET',headers:h,body:o.b?JSON.stringify(o.b):undefined}).then(function(r){
     return r.text().then(function(x){var j=null;try{j=JSON.parse(x)}catch(e){}if(!r.ok)throw (j||{message:x});return j})})}
 function sbStore(r){SB.tok=r.access_token;SB.uid=r.user.id;SB.exp=Date.now()+(r.expires_in||3600)*1000;
@@ -1476,9 +1476,16 @@ function sbPushSoon(){
   clearTimeout(SB.t);SB.t=setTimeout(sbPush,2500)}
 function sbPush(){
   if(!sbOn()||!USER)return;
-  var u=USER,body={data:JSON.parse(JSON.stringify(S)),ts:parseInt(localStorage.getItem('mudhakirati-ts:'+u))||Date.now()};
-  sbTok().then(function(tok){if(!tok)return;body.user_id=SB.uid;
-    return sbReq('/rest/v1/user_data?on_conflict=user_id',{m:'POST',tok:tok,prefer:'resolution=merge-duplicates,return=minimal',b:body})}).catch(function(){})}
+  var u=USER,ts=parseInt(localStorage.getItem('mudhakirati-ts:'+u))||Date.now(),data=JSON.parse(JSON.stringify(S));
+  sbTok().then(function(tok){if(!tok)return;
+    return sbReq('/rest/v1/rpc/save_user_data',{m:'POST',tok:tok,b:{p_data:data,p_ts:ts}}).then(function(serverTs){
+      if(serverTs>ts&&USER===u)return sbPull(u).then(function(){sbReload(u)})})}).catch(function(){})}
+/* the server copy was newer: reload the in-memory state from the freshly pulled local copy */
+function sbReload(u){
+  var raw=null;try{raw=JSON.parse(localStorage.getItem(KEY+':'+u)||'null')}catch(e){}
+  if(!raw||!raw.subjects)return;
+  var lang=S.lang;SYNCING=true;try{S=migrate(raw);S.lang=lang;if(!S.reviews)S.reviews=[]}finally{SYNCING=false}
+  try{render(true)}catch(e){}}
 function sbPull(email){
   return sbReq('/rest/v1/user_data?select=data,ts&user_id=eq.'+SB.uid,{tok:SB.tok}).then(function(rows){
     var r=rows&&rows[0],lt=parseInt(localStorage.getItem('mudhakirati-ts:'+email))||0;
@@ -1525,7 +1532,6 @@ function authRender(){
   var reg=AU.mode==='register',fgt=AU.mode==='forgot'||AU.mode==='recover',rec=AU.mode==='recover',o=AU.open?' open':'',ev=esc(AU.email||'');
   document.getElementById('auth').innerHTML=
    '<button class="rb aulang" type="button" data-au="lang" aria-label="Language">'+(S.lang==='ar'?'EN':'ع')+'</button>'+
-   '<div class="aufs"><button class="rb" type="button" data-au="fs-dec" aria-label="'+esc(pkL('تصغير الخط','Smaller text'))+'"'+(FS.i<=0?' disabled':'')+'>A−</button><button class="rb" type="button" data-au="fs-inc" aria-label="'+esc(pkL('تكبير الخط','Larger text'))+'"'+(FS.i>=FS.L.length-1?' disabled':'')+' style="font-size:calc(20px*var(--fs,1))">A+</button></div>'+
    '<div class="intro"><img class="logo" src="'+LOGO+'" alt="'+esc(t('app'))+'"><h1 class="sr">'+esc(t('app'))+'</h1>'+
    '<div class="intro-b"><button class="btn" type="button" data-au="go-login">'+t('login')+'</button><button class="btn ghost" type="button" data-au="go-register">'+t('register')+'</button></div></div>'+
    '<div class="apscrim'+o+'" data-au="shut"></div>'+
