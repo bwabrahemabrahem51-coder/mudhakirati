@@ -1507,7 +1507,7 @@ function sbAuth(email,pw){
       return hashPw(pw,lu.salt).then(function(h){
         if(h!==lu.hash)return say(t('errBad'));
         return sbReq('/auth/v1/signup',{m:'POST',b:{email:email,password:pw}}).then(done).catch(function(){say(t('errBad'))})})}
-    say(t('errBad'))})}
+    say(t('errBad')+(msg(e)?' ('+msg(e)+')':''))})}
 (function(){var h=location.hash||'';if(h.indexOf('type=recovery')<0)return;
   var p=new URLSearchParams(h.slice(1));SB.rtok=p.get('access_token')||'';
   try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
