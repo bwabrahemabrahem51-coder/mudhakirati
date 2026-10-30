@@ -1161,7 +1161,7 @@ function sheetHtml(k){
     '<div class="sect"><h3>'+pkL('حجم العرض','Display size')+'</h3><div class="lay">'+[['auto',pkL('تلقائي','Auto')],['phone',pkL('تلفون','Phone')],['tablet',pkL('آيباد','iPad')],['laptop',pkL('لابتوب','Laptop')]].map(function(o){return '<button type="button" data-a="layout" data-id="'+o[0]+'" aria-pressed="'+((S.layout||'auto')===o[0])+'">'+ic(o[0],24)+'<span>'+o[1]+'</span></button>'}).join('')+'</div></div>'+
     '<div class="sect"><h3>'+t('themeT')+'</h3><div class="lay" style="grid-template-columns:repeat(3,minmax(0,1fr))">'+[['auto','monitor',t('thAuto'),''],['light','sun',t('thLight'),'light'],['dark','moon',t('thDark'),'dark']].map(function(o){return '<button type="button" data-a="theme" data-id="'+o[0]+'" aria-pressed="'+((S.theme||'')===o[3])+'">'+ic(o[1],24)+'<span>'+o[2]+'</span></button>'}).join('')+'</div></div>'+
     (S.lang==='ar'?'<div class="sect"><h3>الأرقام</h3><label class="row" style="gap:10px;font-weight:700"><input type="checkbox" id="aDig"'+(S.arDigits?' checked':'')+'>استخدم الأرقام العربية (٠١٢٣)</label></div>':'')+
-    installSect()+'<div class="sect"><h3>'+pkL('طباعة / PDF','Print / PDF')+'</h3><button type="button" class="btn ghost prbtn" data-a="print">'+ic('print',20)+'<span>'+pkL('طباعة الجدول أو حفظه PDF','Print schedule or save as PDF')+'</span></button><div class="small muted">'+pkL('من نافذة الطباعة اختر «حفظ بصيغة PDF».','In the print dialog choose “Save as PDF”.')+'</div></div>'+
+    fullSect()+installSect()+'<div class="sect"><h3>'+pkL('طباعة / PDF','Print / PDF')+'</h3><button type="button" class="btn ghost prbtn" data-a="print">'+ic('print',20)+'<span>'+pkL('طباعة الجدول أو حفظه PDF','Print schedule or save as PDF')+'</span></button><div class="small muted">'+pkL('من نافذة الطباعة اختر «حفظ بصيغة PDF».','In the print dialog choose “Save as PDF”.')+'</div></div>'+
     '<div class="sect"><h3>'+t('exportT')+'</h3><div class="prow2"><button type="button" class="btn ghost" data-a="xls" style="height:44px;font-size:calc(14px*var(--fs,1));padding-inline:16px">'+ic('table',18)+'&nbsp;'+t('xlsBtn')+'</button><button type="button" class="btn ghost" data-a="csvtasks" style="height:44px;font-size:calc(14px*var(--fs,1));padding-inline:16px">'+t('csvTasks')+'</button><button type="button" class="btn ghost" data-a="csvlog" style="height:44px;font-size:calc(14px*var(--fs,1));padding-inline:16px">'+t('csvLog')+'</button><button type="button" class="btn ghost" data-a="ics" style="height:44px;font-size:calc(14px*var(--fs,1));padding-inline:16px">'+pkL('تقويم ICS للمهام','Calendar (.ics)')+'</button></div></div>'+
     '<div class="sect"><h3>'+t('backupT')+'</h3><div class="prow2"><button type="button" class="btn ghost" data-a="export" style="height:44px;font-size:calc(14px*var(--fs,1));padding-inline:18px">'+t('expBtn')+'</button><label class="btn ghost" for="impFile">'+t('impBtn')+'</label><input type="file" id="impFile" accept="application/json,.json"></div><div class="small muted">'+t('backupHint')+'</div></div>'+
    '<div class="sect"><h3>'+t('remindT')+'</h3><label class="row" style="gap:10px;font-weight:700"><input type="checkbox" id="rOn"'+(S.remind&&S.remind.on?' checked':'')+'>'+t('remindOn')+'</label><input type="time" id="rTime" aria-label="'+esc(t('remindT'))+'" value="'+((S.remind&&S.remind.time)||'18:00')+'"><div class="small muted">'+t('remindHint')+'</div></div>'+
@@ -1329,7 +1329,7 @@ function closeSheetSafe(){
 function markDirty(e){
   var n=e.target;
   if(!UI.sheet||/^(settings|welcome|subjtype)$/.test(UI.sheet)||!n.closest||!n.closest('#sheetBody'))return;
-  if(/^(rOn|rTime|impFile|pwCur|pwNew|aDig)$/.test(n.id))return;
+  if(/^(rOn|rTime|impFile|pwCur|pwNew|aDig|aFull)$/.test(n.id))return;
   UI.dirty=true}
 document.addEventListener('input',markDirty);document.addEventListener('change',markDirty);
 function closeSheet(){if(typeof pkClose==='function')pkClose();if(UI.sheet==='welcome'&&S.onboarded===false){S.onboarded=true;save()}UI.sheet='';UI.presetDue='';UI.dirty=false;UI.editRv='';UI.editTaskId='';document.getElementById('sheet').classList.remove('open');document.getElementById('scrim').classList.remove('open');mmClose(document.getElementById('sheet'))}
@@ -1774,6 +1774,25 @@ function installSect(){
   if(DEFER)return hd+'<button type="button" class="btn ghost prbtn" data-a="install">'+ic('plus',20)+'<span>'+pkL('أضف مذاكرتي إلى الشاشة الرئيسية','Add Mudhakirati to your home screen')+'</span></button><div class="small muted">'+pkL('يفتح كتطبيق مستقل ويعمل بدون إنترنت.','Opens as a standalone app and works offline.')+'</div></div>';
   if(isIOS())return hd+'<div class="small muted">'+pkL('اضغط زر المشاركة في سفاري، ثم «إضافة إلى الشاشة الرئيسية».','Tap the Share button in Safari, then “Add to Home Screen”.')+'</div></div>';
   return ''}
+function fsSupported(){var d=document.documentElement;return !!(d.requestFullscreen||d.webkitRequestFullscreen)}
+function isFull(){return !!(document.fullscreenElement||document.webkitFullscreenElement)||(window.matchMedia&&matchMedia('(display-mode: fullscreen)').matches)}
+function enterFull(){var d=document.documentElement,f=d.requestFullscreen||d.webkitRequestFullscreen;if(!f)return;try{var r=f.call(d,{navigationUI:'hide'});if(r&&r.catch)r.catch(function(){})}catch(e){}}
+function exitFull(){var f=document.exitFullscreen||document.webkitExitFullscreen;if(!f)return;try{var r=f.call(document);if(r&&r.catch)r.catch(function(){})}catch(e){}}
+function fullLabel(){return isFull()?pkL('الخروج من الشاشة الكاملة','Exit full screen'):pkL('تشغيل الشاشة الكاملة','Enter full screen')}
+function fullSect(){
+  var hd='<div class="sect"><h3>'+pkL('الشاشة الكاملة','Full screen')+'</h3>';
+  if(!fsSupported())return hd+'<div class="small muted">'+pkL('متصفحك ما يدعم الشاشة الكاملة. ثبّت التطبيق على الشاشة الرئيسية حتى يفتح بدون شريط المتصفح.','Your browser does not support full screen. Install the app to your home screen to open it without the browser bar.')+'</div></div>';
+  return hd+'<button type="button" class="btn ghost prbtn" id="fullBtn" data-a="fullscr">'+ic('monitor',20)+'<span>'+fullLabel()+'</span></button>'+
+    '<label class="row" style="gap:10px;font-weight:700"><input type="checkbox" id="aFull"'+(S.autoFull?' checked':'')+'>'+pkL('افتح بالشاشة الكاملة تلقائيًا','Open in full screen automatically')+'</label></div>'}
+function syncFull(){var b=document.querySelector('#fullBtn span');if(b)b.textContent=fullLabel()}
+document.addEventListener('fullscreenchange',syncFull);document.addEventListener('webkitfullscreenchange',syncFull);
+var AUTOF=false;
+document.addEventListener('click',function(){
+  if(AUTOF||!USER)return;AUTOF=true;
+  if(S.autoFull&&fsSupported()&&!isFull())enterFull()},true);
+document.addEventListener('change',function(e){
+  if(e.target.id!=='aFull')return;S.autoFull=e.target.checked;save();
+  if(S.autoFull&&!isFull())enterFull()});
 function doInstall(){var d=DEFER;if(!d)return;DEFER=null;try{d.prompt();if(d.userChoice)d.userChoice.then(closeSheet,function(){})}catch(e){}}
 function hideSplash(){var e=document.getElementById('splash');if(!e||e.classList.contains('off'))return;
   setTimeout(function(){e.classList.add('off');setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},700)},Math.max(0,700-performance.now()))}
@@ -1938,6 +1957,7 @@ document.addEventListener('click',function(e){
   else if(a==='csvlog'){exCsv(exTables().logs,'study-log')}
   else if(a==='print'){doPrint()}
   else if(a==='install'){doInstall()}
+  else if(a==='fullscr'){if(isFull())exitFull();else enterFull();setTimeout(syncFull,250)}
   else if(a==='pick'){UI.editId='';UI.editRv='';openSheet(id)}
   else if(a==='editrv'){UI.editRv=id;openSheet('review')}
   else if(a==='delrv'){
