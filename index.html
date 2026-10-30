@@ -311,7 +311,7 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
 /* sheet */
 .scrim{position:fixed;inset:0;z-index:20;background:var(--scrim);opacity:0;visibility:hidden;transition:opacity .35s,visibility 0s .35s}
 .scrim.open{opacity:1;visibility:visible;transition-delay:0s}
-.sheet{position:fixed;inset-inline:0;bottom:0;z-index:21;max-width:560px;margin-inline:auto;max-height:90%;overflow:auto;background:var(--surface);
+.sheet{position:fixed;inset-inline:0;bottom:var(--kb,0px);z-index:21;max-width:560px;margin-inline:auto;max-height:min(90%,calc(var(--vvh,100vh) - 12px));overflow:auto;overscroll-behavior:contain;background:var(--surface);
   border-radius:30px 30px 0 0;padding-top:10px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));
   padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));
   transform:translateY(105%);visibility:hidden;transition:transform .5s var(--ease),visibility 0s .5s}
@@ -411,7 +411,7 @@ input[type=email]:focus,input[type=password]:focus{outline:none;border-color:var
 .auth .intro-b{display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px;margin-top:6px}
 .auth .apscrim{position:fixed;inset:0;z-index:2;background:var(--scrim);opacity:0;visibility:hidden;transition:opacity .35s,visibility 0s .35s}
 .auth .apscrim.open{opacity:1;visibility:visible;transition-delay:0s}
-.auth .apop{position:fixed;inset-inline:0;bottom:0;z-index:3;max-width:480px;max-height:92%;overflow:auto;margin-inline:auto;display:flex;flex-direction:column;gap:16px;
+.auth .apop{position:fixed;inset-inline:0;bottom:var(--kb,0px);z-index:3;max-width:480px;max-height:min(92%,calc(var(--vvh,100vh) - 12px));overflow:auto;margin-inline:auto;display:flex;flex-direction:column;gap:16px;
   background:var(--surface);border-radius:30px 30px 0 0;padding:12px 20px calc(24px + env(safe-area-inset-bottom,0px));box-shadow:0 -20px 50px -20px rgba(8,12,28,.55);
   transform:translateY(105%);visibility:hidden;transition:transform .5s var(--ease),visibility 0s .5s}
 .auth .apop.open{transform:none;visibility:visible;transition-delay:0s}
@@ -2229,6 +2229,15 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Escape'&&UI.sheet)closeSheetSafe();
   else if(e.key==='Enter'&&e.target.id==='tQ'){e.preventDefault();e.target.blur()}});
 window.addEventListener('resize',placeInd);
+/* on-screen keyboard: lift bottom sheets above it (works whether the browser resizes the layout or only the visual viewport) */
+function kbSync(){
+  var v=window.visualViewport;if(!v)return;
+  var kb=Math.max(0,Math.round(window.innerHeight-v.height-v.offsetTop)),st=document.documentElement.style;
+  st.setProperty('--kb',(kb>80?kb:0)+'px');st.setProperty('--vvh',Math.round(v.height)+'px')}
+if(window.visualViewport){visualViewport.addEventListener('resize',kbSync);visualViewport.addEventListener('scroll',kbSync);kbSync()}
+document.addEventListener('focusin',function(e){
+  var n=e.target;if(!n||!/^(INPUT|TEXTAREA)$/.test(n.tagName)||!n.closest||!n.closest('.sheet,.apop'))return;
+  setTimeout(function(){try{n.scrollIntoView({block:'center',behavior:'smooth'})}catch(x){}},320)});
 /* follow the OS appearance live while the theme is on "auto" */
 try{var mqD=matchMedia('(prefers-color-scheme: dark)'),onSys=function(){if(USER&&!S.theme)render()};
   if(mqD.addEventListener)mqD.addEventListener('change',onSys);else if(mqD.addListener)mqD.addListener(onSys)}catch(e){}
