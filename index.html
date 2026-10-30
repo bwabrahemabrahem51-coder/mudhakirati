@@ -30,14 +30,14 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap"></noscript>
 <style>
 /* Layout: floating pill nav with sliding indicator, one FAB opening bottom sheets, big blue hero card. Every state change animates. */
 :root{
   --bg:#F1F3F9; --surface:#FFFFFF; --ink:#0D1226; --muted:#6A7189; --line:#E3E7F0;
   --accent:#2D5BFF; --accent-ink:#FFFFFF; --soft:#E6ECFF; --bar:#C9D5FF;
   --hero:#2D5BFF; --hero-ink:#FFFFFF; --hot:#F2552C; --ok:#12A579; --track:#E6EAF3;
-  --sh:0 10px 28px -16px rgba(26,40,110,.35); --scrim:rgba(8,12,28,.45);
+  --sh:0 4px 12px -8px rgba(26,40,110,.35); --scrim:rgba(8,12,28,.45);
   --f-display:"Rubik","Tajawal",system-ui,sans-serif;
   --f-body:"Tajawal","Rubik",system-ui,sans-serif;
   --ease:cubic-bezier(.22,.9,.28,1); --spring:cubic-bezier(.3,1.35,.5,1); --w:560px;
@@ -61,6 +61,15 @@
 :root[data-theme="maroon"] .hero .go,:root[data-theme="maroon"] .plan .link{color:#7B1E2E}
 :root[data-theme="maroon"] .hero .go{color:#7B1E2E}
 :root[data-theme="maroon"] .plan .link{color:#fff}
+/* black + white theme */
+:root[data-theme="mono"]{
+  --bg:#F2F2F2; --surface:#FFFFFF; --ink:#0A0A0A; --muted:#6B6B6B; --line:#E0E0E0;
+  --accent:#0A0A0A; --accent-ink:#FFFFFF; --soft:#EBEBEB; --bar:#BDBDBD;
+  --hero:#0A0A0A; --hero-ink:#FFFFFF; --hot:#0A0A0A; --ok:#0A0A0A; --track:#E4E4E4;
+  --sh:0 10px 28px -16px rgba(0,0,0,.35); --scrim:rgba(0,0,0,.5); color-scheme:light}
+:root[data-theme="mono"] .hero .go{color:#0A0A0A}
+:root[data-theme="mono"] .late,:root[data-theme="mono"] .pri{text-decoration:underline}
+:root[data-theme="mono"] .cb.main{box-shadow:0 14px 28px -12px rgba(0,0,0,.5)}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
@@ -128,7 +137,7 @@ button:active{transform:scale(.95)}
 
 /* entrance */
 .rise{opacity:1}
-.enter .rise{animation:rise .55s var(--ease) both;animation-delay:calc(var(--d,0) * 60ms)}
+.enter .rise{animation:rise .3s var(--ease) both;animation-delay:calc(var(--d,0) * 25ms)}
 @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 @keyframes drop{from{opacity:0;transform:translateY(-8px) scale(.9)}to{opacity:1;transform:none}}
 @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.28)}100%{transform:scale(1)}}
@@ -304,8 +313,8 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .nav{position:fixed;inset-inline:0;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:10;pointer-events:none;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .nav .in{pointer-events:auto;position:relative;max-width:520px;margin-inline:auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;padding:6px;
-  background:color-mix(in srgb,var(--surface) 88%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-  border:1px solid var(--line);border-radius:28px;box-shadow:0 16px 40px -18px rgba(20,30,90,.45)}
+  background:var(--surface);
+  border:1px solid var(--line);border-radius:28px;box-shadow:0 6px 16px -10px rgba(20,30,90,.4)}
 .nav .ind{position:absolute;top:6px;bottom:6px;left:0;width:0;border-radius:22px;background:var(--soft);transition:transform .5s var(--spring),width .3s}
 .nav button{position:relative;z-index:1;border:0;background:none;border-radius:22px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px 6px;color:var(--muted);font-size:calc(11.5px*var(--fs,1));font-weight:500}
 .nav button[aria-current=page]{color:var(--accent)}
@@ -323,7 +332,7 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .sheet{position:fixed;inset-inline:0;bottom:var(--kb,0px);z-index:21;max-width:560px;margin-inline:auto;max-height:min(90%,calc(var(--vvh,100vh) - 12px));overflow:auto;overscroll-behavior:contain;background:var(--surface);
   border-radius:30px 30px 0 0;padding-top:10px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));
   padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));
-  transform:translateY(105%);visibility:hidden;transition:transform .5s var(--ease),visibility 0s .5s}
+  transform:translateY(105%);visibility:hidden;transition:transform .32s var(--ease),visibility 0s .32s}
 .sheet.open{transform:none;visibility:visible;transition-delay:0s}
 .grab{width:40px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 14px}
 .sheet h2{font-size:calc(20px*var(--fs,1));margin-bottom:14px}
@@ -427,7 +436,7 @@ input[type=email]:focus,input[type=password]:focus{outline:none;border-color:var
 .auth .apscrim.open{opacity:1;visibility:visible;transition-delay:0s}
 .auth .apop{position:fixed;inset-inline:0;bottom:var(--kb,0px);z-index:3;max-width:480px;max-height:min(92%,calc(var(--vvh,100vh) - 12px));overflow:auto;margin-inline:auto;display:flex;flex-direction:column;gap:16px;
   background:var(--surface);border-radius:30px 30px 0 0;padding:12px 20px calc(24px + env(safe-area-inset-bottom,0px));box-shadow:0 -20px 50px -20px rgba(8,12,28,.55);
-  transform:translateY(105%);visibility:hidden;transition:transform .5s var(--ease),visibility 0s .5s}
+  transform:translateY(105%);visibility:hidden;transition:transform .32s var(--ease),visibility 0s .32s}
 .auth .apop.open{transform:none;visibility:visible;transition-delay:0s}
 .auth .aph{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .auth .aph h2{font-size:calc(24px*var(--fs,1))}
@@ -601,6 +610,19 @@ input[type=email]:focus,input[type=password]:focus{outline:none;border-color:var
   .pr-foot{margin-top:6pt;padding-top:5pt;border-top:.75pt solid #c7ccdc;font-size:8.5pt;color:#6a7189;display:flex;justify-content:space-between}
 }
 
+/* ---- smoothness pass ---- */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;overscroll-behavior-y:none}
+.card,.kpi,.scard,.chip,.pill,.pk,.pkopt,.pick{transition:background-color .2s,border-color .2s,color .2s}
+.nav .ind{transition:transform .35s var(--ease),width .2s var(--ease),height .2s var(--ease),background-color .2s}
+.nav .in,.sheet,.pksheet{contain:layout paint}
+.card,.kpi,.scard{contain:layout style}
+button:active:not(:disabled),.tile:active,.scard:active{transform:scale(.96)}
+.trow{transition:opacity .3s,background-color .3s,max-height .3s var(--ease),transform .26s var(--ease)}
+.view-fade{animation:vfade .32s var(--ease) both}
+@keyframes vfade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.view-fade{animation:none}}
+
 /* PWA splash (installed app only) */
 #splash{display:none;position:fixed;inset:0;z-index:200;background:linear-gradient(160deg,#3D68FF,#1A36C9);color:#fff;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .5s ease,visibility 0s .5s}
 @media (display-mode:standalone){#splash{display:flex}}
@@ -660,7 +682,7 @@ ar:{app:'مذاكرتي',home:'الرئيسية',tasks:'المهام',subjects:'
  overdue:'متأخرة',todayL:'اليوم',tomorrow:'غدًا',later:'لاحقًا',noDate:'بدون موعد',noSubj:'بدون مادة',noSubjects:'أضف مادة أولاً',
  focusLen:'مدة التركيز',breakLen:'مدة الاستراحة',dailyGoal:'هدف اليوم بالدقائق',perSubject:'توزيع الوقت',noTime:'لا يوجد وقت مسجل بعد',
  settings:'إعدادات المؤقت',sessions:'جلسات اليوم',taskPh:'مثال: حل تمارين الفصل الثالث',newSubject:'مادة جديدة',subjPh:'مثال: الكيمياء',
- weekOf:'هذا الأسبوع',of:'من',close:'إغلاق',totalWeek:'مجموع الأسبوع',pct:'من المهام',login:'تسجيل الدخول',register:'إنشاء حساب',email:'البريد الإلكتروني',password:'كلمة المرور',authSub:'سجّل الدخول لتُحفظ بياناتك داخل حسابك.',logout:'تسجيل الخروج',errEmail:'أدخل بريدًا إلكترونيًا صحيحًا',errPw:'كلمة المرور 6 أحرف على الأقل',errBad:'البريد أو كلمة المرور غير صحيحة',errExists:'هذا البريد مسجّل مسبقًا، سجّل الدخول',authNote:'الحساب وبياناته محفوظة على هذا الجهاز.',planTitle:'العد التنازلي',planSet:'ابدأ العد التنازلي',planDays:'كم يومًا باقي على الامتحان؟',planHint:'ينقص العداد يومًا كل منتصف ليل تلقائيًا. بطاقة اختيارية يمكنك إلغاؤها متى شئت.',planDay:'اليوم',dayW:'يومًا',planLeft:'متبقٍ',planDone:'حان الموعد، بالتوفيق!',daysLeft:'يوم متبقٍ',lastDay:'يوم واحد متبقٍ',planPassed:'مضى',planName:'اسم الامتحان (اختياري)',planNamePh:'مثال: الوزاري',planEdit:'تعديل',planClear:'إلغاء الخطة',planSave:'حفظ',planEmpty:'عندك امتحان قريب؟ فعّل العد التنازلي ليتناقص يومًا كل ليلة ويزيد حماسك. اختياري.',partsTitle:'تفاصيل المحاضرات (اختياري)',addPart:'إضافة فصل',partName:'اسم الفصل',partHours:'مجموع وقت المحاضرات (ساعات)',partLec:'عدد المحاضرات',partDef:'فصل',lecW:'محاضرة',splitTitle:'توزيع الدراسة اليومي',splitNeed:'حدد عدد الأيام المتاحة بالعد التنازلي ليُقسَّم وقت المحاضرات عليها.',splitToday:'حصة اليوم',remaining:'المتبقي',allDone:'اكتملت المادة',editSubj:'تفاصيل',splitHint:'اضغط ✓ بعد ما تخلص حصة اليوم لينقص من المتبقي.',saveBtn:'حفظ',daysAvail:'أيام متاحة',profile:'الإعدادات والملف الشخصي',yourName:'الاسم',namePh:'اكتب اسمك',changePhoto:'تغيير الصورة',addPhoto:'إضافة صورة',delPhoto:'حذف الصورة',accountL:'الحساب',navSet:'الإعدادات',addWhat:'ماذا تريد أن تضيف؟',regStudy:'الدراسة الاعتيادية',regHint:'مادة بهدف أسبوعي ولون، وتفاصيل محاضرات اختيارية',focusRev:'مراجعة مركزة',revHint:'فصل واحد: وقت المراجعة يُقسَّم على الأيام المتاحة وتشوف حصتك اليومية',chName:'اسم الفصل',chPh:'مثال: الفصل الأول',rvHours:'مجموع وقت مراجعة الفصل (ساعات)',rvDays:'عدد الأيام المتاحة للفصل',rvPrev:'الحصة اليومية',editRev:'تعديل المراجعة',delRv:'حذف المراجعة',late:'متأخر',addDef:'إضافة مواد السادس',editTask:'تعديل المهمة',backupT:'نسخة احتياطية',expBtn:'تصدير بياناتي',impBtn:'استيراد نسخة',backupHint:'احفظ الملف بمكان آمن، وتكدر ترجّع بياناتك منه بأي وقت أو على جهاز آخر.',impConfirm:'ستُستبدل بياناتك الحالية بالنسخة. متأكد؟',impOk:'تم استيراد النسخة',impBad:'الملف غير صالح',remindT:'تذكير يومي',remindOn:'ذكّرني بحصة اليوم',remindHint:'يصلك الإشعار حتى لو الصفحة بالخلفية. للأفضل ثبّت التطبيق على الشاشة الرئيسية.',remindMsg:'حان وقت الدراسة',focusDone:'انتهت جلسة التركيز، خذ استراحة 🎉',brkDone:'انتهت الاستراحة، ارجع للدراسة',remindShare:'حصة اليوم',pwT:'تغيير كلمة المرور',pwCur:'كلمة المرور الحالية',pwNew:'كلمة المرور الجديدة',pwSave:'تغيير',pwDone:'تم تغيير كلمة المرور',errBad2:'كلمة المرور الحالية غير صحيحة',partsDone:'فصول منجزة',searchPh:'ابحث في المهام',clearQ:'مسح البحث',allSubj:'المادة',allPri:'الأولوية',anyDate:'الموعد',clearF:'مسح الفلاتر',noMatch:'لا توجد مهام مطابقة',fSubj:'تصفية حسب المادة',fPri:'تصفية حسب الأولوية',fDate:'تصفية حسب الموعد',manualSort:'ترتيب يدوي',dragHint:'اسحب المقبض أو استخدم الأسهم لترتيب المهام',dragH:'اسحب لإعادة الترتيب',moveUp:'نقل للأعلى',moveDown:'نقل للأسفل',pWeek:'أسبوع',pMonth:'شهر',mTotal:'مجموع الشهر',vsPrev:'عن الشهر الماضي',mActive:'أيام دراسة',mGoalDays:'أيام حققت الهدف',mDetails:'تفاصيل الشهر',mBest:'أفضل يوم',mStreak:'أطول سلسلة',mAvgStudy:'متوسط يوم الدراسة',mSess:'عدد الجلسات',mGoalLine:'الهدف',mHit:'حققت الهدف',mHint:'اضغط أو اسحب على الأعمدة لعرض كل يوم',mPrev:'الشهر السابق',mNext:'الشهر التالي',vList:'قائمة',vWeek:'أسبوعي',wkPrev:'الأسبوع السابق',wkNext:'الأسبوع التالي',wkAdd:'إضافة مهمة لهذا اليوم',wkEmpty:'لا مهام',wkStudy:'دراسة',wkTasks:'مهام',themeT:'المظهر',thAuto:'تلقائي',thLight:'فاتح',thDark:'داكن',thMaroon:'ماروني',exportT:'تصدير إلى Excel / CSV',xlsBtn:'Excel (‎.xls) كل الجداول',csvLog:'CSV سجل الدراسة',csvTasks:'CSV المهام',shTasks:'المهام',shSubj:'المواد',shLog:'سجل الدراسة',cTitle:'المهمة',cSubj:'المادة',cDue:'الموعد',cPri:'الأولوية',cStatus:'الحالة',cName:'الاسم',cTarget:'الهدف الأسبوعي (ساعة)',cWeekMin:'دقائق هذا الأسبوع',cTotMin:'مجموع الدقائق',cDate:'التاريخ',cMin:'الدقائق',exOk:'تم تجهيز الملف'},
+ weekOf:'هذا الأسبوع',of:'من',close:'إغلاق',totalWeek:'مجموع الأسبوع',pct:'من المهام',login:'تسجيل الدخول',register:'إنشاء حساب',email:'البريد الإلكتروني',password:'كلمة المرور',authSub:'سجّل الدخول لتُحفظ بياناتك داخل حسابك.',logout:'تسجيل الخروج',errEmail:'أدخل بريدًا إلكترونيًا صحيحًا',errPw:'كلمة المرور 6 أحرف على الأقل',errBad:'البريد أو كلمة المرور غير صحيحة',errExists:'هذا البريد مسجّل مسبقًا، سجّل الدخول',authNote:'الحساب وبياناته محفوظة على هذا الجهاز.',planTitle:'العد التنازلي',planSet:'ابدأ العد التنازلي',planDays:'كم يومًا باقي على الامتحان؟',planHint:'ينقص العداد يومًا كل منتصف ليل تلقائيًا. بطاقة اختيارية يمكنك إلغاؤها متى شئت.',planDay:'اليوم',dayW:'يومًا',planLeft:'متبقٍ',planDone:'حان الموعد، بالتوفيق!',daysLeft:'يوم متبقٍ',lastDay:'يوم واحد متبقٍ',planPassed:'مضى',planName:'اسم الامتحان (اختياري)',planNamePh:'مثال: الوزاري',planEdit:'تعديل',planClear:'إلغاء الخطة',planSave:'حفظ',planEmpty:'عندك امتحان قريب؟ فعّل العد التنازلي ليتناقص يومًا كل ليلة ويزيد حماسك. اختياري.',partsTitle:'تفاصيل المحاضرات (اختياري)',addPart:'إضافة فصل',partName:'اسم الفصل',partHours:'مجموع وقت المحاضرات (ساعات)',partLec:'عدد المحاضرات',partDef:'فصل',lecW:'محاضرة',splitTitle:'توزيع الدراسة اليومي',splitNeed:'حدد عدد الأيام المتاحة بالعد التنازلي ليُقسَّم وقت المحاضرات عليها.',splitToday:'حصة اليوم',remaining:'المتبقي',allDone:'اكتملت المادة',editSubj:'تفاصيل',splitHint:'اضغط ✓ بعد ما تخلص حصة اليوم لينقص من المتبقي.',saveBtn:'حفظ',daysAvail:'أيام متاحة',profile:'الإعدادات والملف الشخصي',yourName:'الاسم',namePh:'اكتب اسمك',changePhoto:'تغيير الصورة',addPhoto:'إضافة صورة',delPhoto:'حذف الصورة',accountL:'الحساب',navSet:'الإعدادات',addWhat:'ماذا تريد أن تضيف؟',regStudy:'الدراسة الاعتيادية',regHint:'مادة بهدف أسبوعي ولون، وتفاصيل محاضرات اختيارية',focusRev:'مراجعة مركزة',revHint:'فصل واحد: وقت المراجعة يُقسَّم على الأيام المتاحة وتشوف حصتك اليومية',chName:'اسم الفصل',chPh:'مثال: الفصل الأول',rvHours:'مجموع وقت مراجعة الفصل (ساعات)',rvDays:'عدد الأيام المتاحة للفصل',rvPrev:'الحصة اليومية',editRev:'تعديل المراجعة',delRv:'حذف المراجعة',late:'متأخر',addDef:'إضافة مواد السادس',editTask:'تعديل المهمة',backupT:'نسخة احتياطية',expBtn:'تصدير بياناتي',impBtn:'استيراد نسخة',backupHint:'احفظ الملف بمكان آمن، وتكدر ترجّع بياناتك منه بأي وقت أو على جهاز آخر.',impConfirm:'ستُستبدل بياناتك الحالية بالنسخة. متأكد؟',impOk:'تم استيراد النسخة',impBad:'الملف غير صالح',remindT:'تذكير يومي',remindOn:'ذكّرني بحصة اليوم',remindHint:'يصلك الإشعار حتى لو الصفحة بالخلفية. للأفضل ثبّت التطبيق على الشاشة الرئيسية.',remindMsg:'حان وقت الدراسة',focusDone:'انتهت جلسة التركيز، خذ استراحة 🎉',brkDone:'انتهت الاستراحة، ارجع للدراسة',remindShare:'حصة اليوم',pwT:'تغيير كلمة المرور',pwCur:'كلمة المرور الحالية',pwNew:'كلمة المرور الجديدة',pwSave:'تغيير',pwDone:'تم تغيير كلمة المرور',errBad2:'كلمة المرور الحالية غير صحيحة',partsDone:'فصول منجزة',searchPh:'ابحث في المهام',clearQ:'مسح البحث',allSubj:'المادة',allPri:'الأولوية',anyDate:'الموعد',clearF:'مسح الفلاتر',noMatch:'لا توجد مهام مطابقة',fSubj:'تصفية حسب المادة',fPri:'تصفية حسب الأولوية',fDate:'تصفية حسب الموعد',manualSort:'ترتيب يدوي',dragHint:'اسحب المقبض أو استخدم الأسهم لترتيب المهام',dragH:'اسحب لإعادة الترتيب',moveUp:'نقل للأعلى',moveDown:'نقل للأسفل',pWeek:'أسبوع',pMonth:'شهر',mTotal:'مجموع الشهر',vsPrev:'عن الشهر الماضي',mActive:'أيام دراسة',mGoalDays:'أيام حققت الهدف',mDetails:'تفاصيل الشهر',mBest:'أفضل يوم',mStreak:'أطول سلسلة',mAvgStudy:'متوسط يوم الدراسة',mSess:'عدد الجلسات',mGoalLine:'الهدف',mHit:'حققت الهدف',mHint:'اضغط أو اسحب على الأعمدة لعرض كل يوم',mPrev:'الشهر السابق',mNext:'الشهر التالي',vList:'قائمة',vWeek:'أسبوعي',wkPrev:'الأسبوع السابق',wkNext:'الأسبوع التالي',wkAdd:'إضافة مهمة لهذا اليوم',wkEmpty:'لا مهام',wkStudy:'دراسة',wkTasks:'مهام',themeT:'المظهر',thAuto:'تلقائي',thLight:'فاتح',thDark:'داكن',thMaroon:'ماروني',thMono:'أسود وأبيض',exportT:'تصدير إلى Excel / CSV',xlsBtn:'Excel (‎.xls) كل الجداول',csvLog:'CSV سجل الدراسة',csvTasks:'CSV المهام',shTasks:'المهام',shSubj:'المواد',shLog:'سجل الدراسة',cTitle:'المهمة',cSubj:'المادة',cDue:'الموعد',cPri:'الأولوية',cStatus:'الحالة',cName:'الاسم',cTarget:'الهدف الأسبوعي (ساعة)',cWeekMin:'دقائق هذا الأسبوع',cTotMin:'مجموع الدقائق',cDate:'التاريخ',cMin:'الدقائق',exOk:'تم تجهيز الملف'},
 en:{app:'Mudhakirati',home:'Home',tasks:'Tasks',subjects:'Subjects',timer:'Timer',progress:'Progress',
  g:['Good morning','Good afternoon','Good evening','Good night'],
  goal:'Today’s goal',min:'min',hrs:'h',reached:'Daily goal reached',startSession:'Start session',
@@ -673,7 +695,7 @@ en:{app:'Mudhakirati',home:'Home',tasks:'Tasks',subjects:'Subjects',timer:'Timer
  overdue:'Overdue',todayL:'Today',tomorrow:'Tomorrow',later:'Later',noDate:'No date',noSubj:'No subject',noSubjects:'Add a subject first',
  focusLen:'Focus length',breakLen:'Break length',dailyGoal:'Daily goal in minutes',perSubject:'Time split',noTime:'No time logged yet',
  settings:'Timer settings',sessions:'Sessions today',taskPh:'e.g. Chapter 3 exercises',newSubject:'New subject',subjPh:'e.g. Chemistry',
- weekOf:'this week',of:'of',close:'Close',totalWeek:'Week total',pct:'of tasks',login:'Log in',register:'Sign up',email:'Email',password:'Password',authSub:'Log in so your data is saved to your account.',logout:'Log out',errEmail:'Enter a valid email',errPw:'Password must be at least 6 characters',errBad:'Wrong email or password',errExists:'This email is already registered, log in',authNote:'Your account and data are stored on this device.',planTitle:'Countdown',planSet:'Start countdown',planDays:'How many days until the exam?',planHint:'The counter drops one day every midnight. Optional, cancel any time.',planDay:'Day',dayW:'days',planLeft:'left',planDone:'It’s time, good luck!',daysLeft:'days left',lastDay:'1 day left',planPassed:'elapsed',planName:'Exam name (optional)',planNamePh:'e.g. Final exam',planEdit:'Edit',planClear:'Cancel plan',planSave:'Save',planEmpty:'Have an exam coming up? Turn on the countdown, it drops a day every night. Optional.',partsTitle:'Lecture details (optional)',addPart:'Add chapter',partName:'Chapter name',partHours:'Total lecture time (hours)',partLec:'Number of lectures',partDef:'Chapter',lecW:'lectures',splitTitle:'Daily study split',splitNeed:'Set the available days with the countdown so lecture time can be divided across them.',splitToday:'Today’s share',remaining:'Remaining',allDone:'Subject complete',editSubj:'Details',splitHint:'Tap ✓ after finishing today’s share to reduce what’s left.',saveBtn:'Save',daysAvail:'days available',profile:'Settings & profile',yourName:'Name',namePh:'Enter your name',changePhoto:'Change photo',addPhoto:'Add photo',delPhoto:'Remove photo',accountL:'Account',navSet:'Settings',addWhat:'What do you want to add?',regStudy:'Regular study',regHint:'A subject with a weekly target, color and optional lecture details',focusRev:'Focused review',revHint:'One chapter: review time is divided across the available days to give your daily share',chName:'Chapter name',chPh:'e.g. Chapter 1',rvHours:'Total review time for the chapter (hours)',rvDays:'Days available for the chapter',rvPrev:'Daily share',editRev:'Edit review',delRv:'Delete review',late:'Overdue',addDef:'Add 6th-grade subjects',editTask:'Edit task',backupT:'Backup',expBtn:'Export my data',impBtn:'Import backup',backupHint:'Keep the file somewhere safe. You can restore your data from it any time or on another device.',impConfirm:'Your current data will be replaced by the backup. Sure?',impOk:'Backup imported',impBad:'Invalid file',remindT:'Daily reminder',remindOn:'Remind me of today’s share',remindHint:'You get the notification even with the page in the background. For best results, install the app to your home screen.',remindMsg:'Time to study',focusDone:'Focus session finished, take a break 🎉',brkDone:'Break is over, back to studying',remindShare:'Today’s share',pwT:'Change password',pwCur:'Current password',pwNew:'New password',pwSave:'Change',pwDone:'Password changed',errBad2:'Current password is wrong',partsDone:'chapters done',searchPh:'Search tasks',clearQ:'Clear search',allSubj:'Subject',allPri:'Priority',anyDate:'Date',clearF:'Clear filters',noMatch:'No matching tasks',fSubj:'Filter by subject',fPri:'Filter by priority',fDate:'Filter by date',manualSort:'Manual order',dragHint:'Drag the handle or use the arrows to reorder',dragH:'Drag to reorder',moveUp:'Move up',moveDown:'Move down',pWeek:'Week',pMonth:'Month',mTotal:'Month total',vsPrev:'vs last month',mActive:'Study days',mGoalDays:'Goal days',mDetails:'Month details',mBest:'Best day',mStreak:'Longest streak',mAvgStudy:'Avg per study day',mSess:'Sessions',mGoalLine:'Goal',mHit:'Goal reached',mHint:'Tap or drag across the bars to see each day',mPrev:'Previous month',mNext:'Next month',vList:'List',vWeek:'Week',wkPrev:'Previous week',wkNext:'Next week',wkAdd:'Add a task for this day',wkEmpty:'No tasks',wkStudy:'Study',wkTasks:'Tasks',themeT:'Appearance',thAuto:'Auto',thLight:'Light',thDark:'Dark',thMaroon:'Maroon',exportT:'Export to Excel / CSV',xlsBtn:'Excel (.xls) all sheets',csvLog:'CSV study log',csvTasks:'CSV tasks',shTasks:'Tasks',shSubj:'Subjects',shLog:'Study log',cTitle:'Task',cSubj:'Subject',cDue:'Due',cPri:'Priority',cStatus:'Status',cName:'Name',cTarget:'Weekly target (h)',cWeekMin:'Minutes this week',cTotMin:'Total minutes',cDate:'Date',cMin:'Minutes',exOk:'File ready'}
+ weekOf:'this week',of:'of',close:'Close',totalWeek:'Week total',pct:'of tasks',login:'Log in',register:'Sign up',email:'Email',password:'Password',authSub:'Log in so your data is saved to your account.',logout:'Log out',errEmail:'Enter a valid email',errPw:'Password must be at least 6 characters',errBad:'Wrong email or password',errExists:'This email is already registered, log in',authNote:'Your account and data are stored on this device.',planTitle:'Countdown',planSet:'Start countdown',planDays:'How many days until the exam?',planHint:'The counter drops one day every midnight. Optional, cancel any time.',planDay:'Day',dayW:'days',planLeft:'left',planDone:'It’s time, good luck!',daysLeft:'days left',lastDay:'1 day left',planPassed:'elapsed',planName:'Exam name (optional)',planNamePh:'e.g. Final exam',planEdit:'Edit',planClear:'Cancel plan',planSave:'Save',planEmpty:'Have an exam coming up? Turn on the countdown, it drops a day every night. Optional.',partsTitle:'Lecture details (optional)',addPart:'Add chapter',partName:'Chapter name',partHours:'Total lecture time (hours)',partLec:'Number of lectures',partDef:'Chapter',lecW:'lectures',splitTitle:'Daily study split',splitNeed:'Set the available days with the countdown so lecture time can be divided across them.',splitToday:'Today’s share',remaining:'Remaining',allDone:'Subject complete',editSubj:'Details',splitHint:'Tap ✓ after finishing today’s share to reduce what’s left.',saveBtn:'Save',daysAvail:'days available',profile:'Settings & profile',yourName:'Name',namePh:'Enter your name',changePhoto:'Change photo',addPhoto:'Add photo',delPhoto:'Remove photo',accountL:'Account',navSet:'Settings',addWhat:'What do you want to add?',regStudy:'Regular study',regHint:'A subject with a weekly target, color and optional lecture details',focusRev:'Focused review',revHint:'One chapter: review time is divided across the available days to give your daily share',chName:'Chapter name',chPh:'e.g. Chapter 1',rvHours:'Total review time for the chapter (hours)',rvDays:'Days available for the chapter',rvPrev:'Daily share',editRev:'Edit review',delRv:'Delete review',late:'Overdue',addDef:'Add 6th-grade subjects',editTask:'Edit task',backupT:'Backup',expBtn:'Export my data',impBtn:'Import backup',backupHint:'Keep the file somewhere safe. You can restore your data from it any time or on another device.',impConfirm:'Your current data will be replaced by the backup. Sure?',impOk:'Backup imported',impBad:'Invalid file',remindT:'Daily reminder',remindOn:'Remind me of today’s share',remindHint:'You get the notification even with the page in the background. For best results, install the app to your home screen.',remindMsg:'Time to study',focusDone:'Focus session finished, take a break 🎉',brkDone:'Break is over, back to studying',remindShare:'Today’s share',pwT:'Change password',pwCur:'Current password',pwNew:'New password',pwSave:'Change',pwDone:'Password changed',errBad2:'Current password is wrong',partsDone:'chapters done',searchPh:'Search tasks',clearQ:'Clear search',allSubj:'Subject',allPri:'Priority',anyDate:'Date',clearF:'Clear filters',noMatch:'No matching tasks',fSubj:'Filter by subject',fPri:'Filter by priority',fDate:'Filter by date',manualSort:'Manual order',dragHint:'Drag the handle or use the arrows to reorder',dragH:'Drag to reorder',moveUp:'Move up',moveDown:'Move down',pWeek:'Week',pMonth:'Month',mTotal:'Month total',vsPrev:'vs last month',mActive:'Study days',mGoalDays:'Goal days',mDetails:'Month details',mBest:'Best day',mStreak:'Longest streak',mAvgStudy:'Avg per study day',mSess:'Sessions',mGoalLine:'Goal',mHit:'Goal reached',mHint:'Tap or drag across the bars to see each day',mPrev:'Previous month',mNext:'Next month',vList:'List',vWeek:'Week',wkPrev:'Previous week',wkNext:'Next week',wkAdd:'Add a task for this day',wkEmpty:'No tasks',wkStudy:'Study',wkTasks:'Tasks',themeT:'Appearance',thAuto:'Auto',thLight:'Light',thDark:'Dark',thMaroon:'Maroon',thMono:'Black & White',exportT:'Export to Excel / CSV',xlsBtn:'Excel (.xls) all sheets',csvLog:'CSV study log',csvTasks:'CSV tasks',shTasks:'Tasks',shSubj:'Subjects',shLog:'Study log',cTitle:'Task',cSubj:'Subject',cDue:'Due',cPri:'Priority',cStatus:'Status',cName:'Name',cTarget:'Weekly target (h)',cWeekMin:'Minutes this week',cTotMin:'Total minutes',cDate:'Date',cMin:'Minutes',exOk:'File ready'}
 };
 var P={
  plus:'<path d="M12 5v14M5 12h14"/>',
@@ -758,7 +780,8 @@ function migrate(raw){
   o.reviews=arr(o.reviews).filter(function(r){return r&&r.name&&+r.hours>0&&+r.days>0}).map(function(r,i){
     r=ext({},r);r.id=r.id||uid();r.hours=+r.hours;r.days=+r.days;r.start=dre.test(r.start||'')?r.start:today();r.ext=+r.ext||0;r.doneH=+r.doneH||0;r.dd=r.dd&&typeof r.dd==='object'?r.dd:{};r.color=r.color||COLORS[i%COLORS.length];r.kind=({misc:1,hw:1})[r.kind]?r.kind:'rev';return r});
   o.lists=arr(o.lists).filter(function(l){return l&&l.name}).map(function(l){return {id:l.id||uid(),kind:l.kind==='hw'?'hw':'misc',name:String(l.name),done:!!l.done}});
-  o.theme=o.theme==='dark'||o.theme==='light'||o.theme==='maroon'?o.theme:'';
+  if(o.remind&&typeof o.remind==='object')o.remind.on=false;
+  o.theme=o.theme==='dark'||o.theme==='light'||o.theme==='maroon'||o.theme==='mono'?o.theme:'';
   o.layout=['phone','tablet','laptop'].indexOf(o.layout)>-1?o.layout:'auto';
   o.taskSort=o.taskSort==='manual'?'manual':'auto';
   o.taskView=o.taskView==='week'?'week':'list';
@@ -771,7 +794,12 @@ function migrate(raw){
 var USERS_K='mudhakirati-users',SESS_K='mudhakirati-session',LANG_K='mudhakirati-lang',USER='';
 var S=seed();
 try{var _l=localStorage.getItem(LANG_K);if(_l==='ar'||_l==='en')S.lang=_l}catch(e){}
-function save(){if(!USER||SYNCING)return;S.v=SCHEMA;try{localStorage.setItem(KEY+':'+USER,JSON.stringify(S))}catch(e){}sbPushSoon()}
+var SVT=0,SVP=false;
+function writeSave(){SVP=false;clearTimeout(SVT);if(!USER||SYNCING)return;S.v=SCHEMA;try{localStorage.setItem(KEY+':'+USER,JSON.stringify(S))}catch(e){}sbPushSoon()}
+function save(){if(!USER||SYNCING)return;SVP=true;clearTimeout(SVT);SVT=setTimeout(writeSave,200)}   /* debounced: many renders = one write */
+function flushSave(){if(SVP)writeSave()}
+document.addEventListener('visibilitychange',function(){if(document.hidden)flushSave()});
+window.addEventListener('pagehide',flushSave);
 function t(k){return TXT[S.lang][k]}
 function loc(){return S.lang==='ar'?(S.arDigits?'ar-IQ-u-nu-arab':'ar-IQ-u-nu-latn'):'en-GB'}
 function fmtDate(k){return new Date(k+'T00:00:00').toLocaleDateString(loc(),{day:'numeric',month:'short'})}
@@ -1185,13 +1213,13 @@ function sheetHtml(k){
    '<button class="btn" type="submit">'+t('planSave')+'</button></form>'+
    '<div class="sect"><h3>'+pkL('حجم الخط','Font size')+'</h3><div class="fsz">'+'<button type="button" data-a="fs" data-id="dec" aria-label="'+esc(pkL('تصغير الخط','Smaller text'))+'"'+(FS.i<=0?' disabled':'')+' style="font-size:15px">A−</button>'+'<div class="fl2" id="fsLbl">'+fsLabel()+'<small>'+(FS.i+1)+' / '+FS.L.length+'</small></div>'+'<button type="button" data-a="fs" data-id="inc" aria-label="'+esc(pkL('تكبير الخط','Larger text'))+'"'+(FS.i>=FS.L.length-1?' disabled':'')+' style="font-size:22px">A+</button></div></div>'+
     '<div class="sect"><h3>'+pkL('حجم العرض','Display size')+'</h3><div class="lay">'+[['auto',pkL('تلقائي','Auto')],['phone',pkL('تلفون','Phone')],['tablet',pkL('آيباد','iPad')],['laptop',pkL('لابتوب','Laptop')]].map(function(o){return '<button type="button" data-a="layout" data-id="'+o[0]+'" aria-pressed="'+((S.layout||'auto')===o[0])+'">'+ic(o[0],24)+'<span>'+o[1]+'</span></button>'}).join('')+'</div></div>'+
-    '<div class="sect"><h3>'+t('themeT')+'</h3><div class="lay">'+[['auto','monitor',t('thAuto'),''],['light','sun',t('thLight'),'light'],['dark','moon',t('thDark'),'dark'],['maroon','flame',t('thMaroon'),'maroon']].map(function(o){return '<button type="button" data-a="theme" data-id="'+o[0]+'" aria-pressed="'+((S.theme||'')===o[3])+'">'+ic(o[1],24)+'<span>'+o[2]+'</span></button>'}).join('')+'</div></div>'+
+    '<div class="sect"><h3>'+t('themeT')+'</h3><div class="lay" style="grid-template-columns:repeat(3,minmax(0,1fr))">'+[['auto','monitor',t('thAuto'),''],['light','sun',t('thLight'),'light'],['dark','moon',t('thDark'),'dark'],['maroon','flame',t('thMaroon'),'maroon'],['mono','minus',t('thMono'),'mono']].map(function(o){return '<button type="button" data-a="theme" data-id="'+o[0]+'" aria-pressed="'+((S.theme||'')===o[3])+'">'+ic(o[1],24)+'<span>'+o[2]+'</span></button>'}).join('')+'</div></div>'+
     '<div class="sect"><h3>'+pkL('اللغة','Language')+'</h3><div class="lay" style="grid-template-columns:repeat(2,minmax(0,1fr))">'+[['ar','العربية'],['en','English']].map(function(o){return '<button type="button" data-a="setlang" data-id="'+o[0]+'" aria-pressed="'+(S.lang===o[0])+'">'+ic('globe',24)+'<span>'+o[1]+'</span></button>'}).join('')+'</div></div>'+
     (S.lang==='ar'?'<div class="sect"><h3>الأرقام</h3><label class="row" style="gap:10px;font-weight:700"><input type="checkbox" id="aDig"'+(S.arDigits?' checked':'')+'>استخدم الأرقام العربية (٠١٢٣)</label></div>':'')+
     fullSect()+installSect()+'<div class="sect"><h3>'+pkL('طباعة / PDF','Print / PDF')+'</h3><button type="button" class="btn ghost prbtn" data-a="print">'+ic('print',20)+'<span>'+pkL('طباعة الجدول أو حفظه PDF','Print schedule or save as PDF')+'</span></button><div class="small muted">'+pkL('من نافذة الطباعة اختر «حفظ بصيغة PDF».','In the print dialog choose “Save as PDF”.')+'</div></div>'+
     '<div class="sect"><h3>'+t('exportT')+'</h3><div class="prow2"><button type="button" class="btn ghost" data-a="xls" style="height:44px;font-size:calc(14px*var(--fs,1));padding-inline:16px">'+ic('table',18)+'&nbsp;'+t('xlsBtn')+'</button><button type="button" class="btn ghost" data-a="csvtasks" style="height:44px;font-size:calc(14px*var(--fs,1));padding-inline:16px">'+t('csvTasks')+'</button><button type="button" class="btn ghost" data-a="csvlog" style="height:44px;font-size:calc(14px*var(--fs,1));padding-inline:16px">'+t('csvLog')+'</button><button type="button" class="btn ghost" data-a="ics" style="height:44px;font-size:calc(14px*var(--fs,1));padding-inline:16px">'+pkL('تقويم ICS للمهام','Calendar (.ics)')+'</button></div></div>'+
     '<div class="sect"><h3>'+t('backupT')+'</h3><div class="prow2"><button type="button" class="btn ghost" data-a="export" style="height:44px;font-size:calc(14px*var(--fs,1));padding-inline:18px">'+t('expBtn')+'</button><label class="btn ghost" for="impFile">'+t('impBtn')+'</label><input type="file" id="impFile" accept="application/json,.json"></div><div class="small muted">'+t('backupHint')+'</div></div>'+
-   '<div class="sect"><h3>'+t('remindT')+'</h3><label class="row" style="gap:10px;font-weight:700"><input type="checkbox" id="rOn"'+(S.remind&&S.remind.on?' checked':'')+'>'+t('remindOn')+'</label><input type="time" id="rTime" aria-label="'+esc(t('remindT'))+'" value="'+((S.remind&&S.remind.time)||'18:00')+'"><div class="small muted">'+t('remindHint')+'</div></div>'+
+   
    '<details class="opt"><summary>'+t('pwT')+'</summary><form id="fPw" style="display:flex;flex-direction:column;gap:12px"><label class="f">'+t('pwCur')+'<input type="password" id="pwCur" required autocomplete="current-password"></label><label class="f">'+t('pwNew')+'<input type="password" id="pwNew" required minlength="6" autocomplete="new-password"></label><div class="small" id="pwMsg" style="min-height:20px;font-weight:700"></div><button class="btn" type="submit">'+t('pwSave')+'</button></form></details>'+
    '<div class="sect"><button class="btn ghost" type="button" data-a="logout">'+t('logout')+'</button></div>';
   if(k==='task'){var et=UI.editTaskId?S.tasks.filter(function(x){return x.id===UI.editTaskId})[0]:null;
@@ -1211,7 +1239,7 @@ function sheetHtml(k){
    '<label class="f">'+t('planDays')+'<input type="number" id="pDays" min="1" max="365" value="'+(S.plan?planInfo().left||S.plan.days:20)+'" inputmode="numeric" required></label>'+
    '<p class="muted small" style="margin:0">'+t('planHint')+'</p><button class="btn" type="submit">'+t('planSave')+'</button>'+
    (S.plan?'<button class="btn ghost" type="button" data-a="delplan">'+t('planClear')+'</button>':'')+'</form>';
-  if(k==='settings')return '<h2>'+t('settings')+'</h2><form id="fSet"><div class="g2"><label class="f">'+t('focusLen')+'<input type="number" id="sFocus" min="1" max="120" value="'+S.settings.focus+'" inputmode="numeric"></label>'+
+  if(k==='settings')return '<h2>'+t('settings')+'</h2><form id="fSet"><div class="g2"><label class="f">'+t('focusLen')+'<input type="number" id="sFocus" min="1" value="'+S.settings.focus+'" inputmode="numeric"></label>'+
    '<label class="f">'+t('breakLen')+'<input type="number" id="sBrk" min="1" max="60" value="'+S.settings.brk+'" inputmode="numeric"></label></div>'+
    '<label class="f">'+t('dailyGoal')+'<input type="number" id="sGoal" min="10" max="900" step="5" value="'+S.settings.goal+'" inputmode="numeric"></label>'+
    '<button class="btn" type="submit">'+t('close')+'</button></form>';
@@ -1360,7 +1388,7 @@ function closeSheetSafe(){
 function markDirty(e){
   var n=e.target;
   if(!UI.sheet||/^(settings|welcome|subjtype)$/.test(UI.sheet)||!n.closest||!n.closest('#sheetBody'))return;
-  if(/^(rOn|rTime|impFile|pwCur|pwNew|aDig|aFull)$/.test(n.id))return;
+  if(/^(rOn|rTime|rSubj|impFile|pwCur|pwNew|aDig|aFull)$/.test(n.id))return;
   UI.dirty=true}
 document.addEventListener('input',markDirty);document.addEventListener('change',markDirty);
 function closeSheet(){if(typeof pkClose==='function')pkClose();if(UI.sheet==='welcome'&&S.onboarded===false){S.onboarded=true;save()}UI.sheet='';UI.presetDue='';UI.dirty=false;UI.editRv='';UI.editTaskId='';document.getElementById('sheet').classList.remove('open');document.getElementById('scrim').classList.remove('open');mmClose(document.getElementById('sheet'))}
@@ -1399,15 +1427,15 @@ function render(enter){
   D=0;var de=document.documentElement;
   de.lang=S.lang;de.dir=S.lang==='ar'?'rtl':'ltr';
   if(S.theme)de.setAttribute('data-theme',S.theme);else de.removeAttribute('data-theme');
-  var tcm=document.querySelector('meta[name=theme-color]');if(tcm)tcm.setAttribute('content',S.theme==='maroon'?'#F5EFE6':isDark()?'#0A0E1C':'#F1F3F9');
+  var tcm=document.querySelector('meta[name=theme-color]');if(tcm)tcm.setAttribute('content',S.theme==='maroon'?'#F5EFE6':S.theme==='mono'?'#F2F2F2':isDark()?'#0A0E1C':'#F1F3F9');
   applyLayout();
   if(!navBuilt)buildNav();
   document.getElementById('dateLine').textContent=new Date().toLocaleDateString(loc(),{weekday:'long',day:'numeric',month:'long'});
   var h=new Date().getHours();updateGreet();
   document.getElementById('avBtn').innerHTML=avInner(S.profile&&S.profile.photo,profName());
   document.getElementById('sub').textContent=subMsg();updateStreak();
-  var thB=document.getElementById('themeBtn'),thL=S.theme==='dark'?t('thDark'):S.theme==='light'?t('thLight'):S.theme==='maroon'?t('thMaroon'):t('thAuto');
-  thB.innerHTML=ic(S.theme==='dark'?'moon':S.theme==='light'?'sun':S.theme==='maroon'?'flame':'monitor',20);thB.setAttribute('aria-label',t('themeT')+': '+thL);thB.title=t('themeT')+': '+thL;
+  var thB=document.getElementById('themeBtn'),thL=S.theme==='dark'?t('thDark'):S.theme==='light'?t('thLight'):S.theme==='maroon'?t('thMaroon'):S.theme==='mono'?t('thMono'):t('thAuto');
+  thB.innerHTML=ic(S.theme==='dark'?'moon':S.theme==='light'?'sun':S.theme==='maroon'?'flame':S.theme==='mono'?'minus':'monitor',20);thB.setAttribute('aria-label',t('themeT')+': '+thL);thB.title=t('themeT')+': '+thL;
   document.getElementById('fab').innerHTML=ic('plus',28);document.getElementById('sbrand').textContent=t('app');
   [].forEach.call(document.querySelectorAll('[data-lbl]'),function(s){s.textContent=t(s.getAttribute('data-lbl'))});
   [].forEach.call(document.querySelectorAll('#nav button'),function(b){if(b.getAttribute('data-id')===S.view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
@@ -1475,7 +1503,7 @@ function updateGreet(){
   var d=new Date(),ms=((d.getHours()*60+d.getMinutes())*60+d.getSeconds())*1000+d.getMilliseconds();
   var x=t('g')[ms<21600000||ms>=64800900?3:0]+(profName()?(S.lang==='ar'?'، ':', ')+profName():'');
   if(g.textContent!==x)g.textContent=x}
-setInterval(function(){if(USER)updateGreet()},100);
+setInterval(function(){if(USER&&!document.hidden)updateGreet()},30000);
 function dayCheck(){if(USER&&today()!==lastDay){lastDay=today();rollRv();render()}else if(today()!==lastDay)lastDay=today()}
 setInterval(dayCheck,20000);document.addEventListener('visibilitychange',dayCheck);
 
@@ -1646,7 +1674,7 @@ function enterApp(email){
   var trec=readTimer();   /* read before setMode() overwrites it with an idle timer */
   TM.running=false;setMode('focus');TM.subj=S.subjects[0]?S.subjects[0].id:'';
   if(trec){applyTimer(trec);swTimer()}
-  UI.filter='open';UI.confirm='';UI.sheet='';
+  UI.filter='open';UI.confirm='';UI.sheet='';regDaily();
   document.body.classList.remove('locked');closeSheet();
   window.scrollTo({top:0,behavior:'auto'});
   try{var qv=new URLSearchParams(location.search).get('view');if(qv&&VIEWS.indexOf(qv)>-1){S.view=qv;history.replaceState(null,'',location.pathname)}}catch(e){}
@@ -1663,7 +1691,7 @@ function compactLogs(){
     keep.push(l)});
   if(keep.length!==S.logs.length)S.logs=keep}
 function logout(){
-  save();if(SB){clearTimeout(SB.t);sbPush()}USER='';clearSession();if(SB){SB.tok='';try{localStorage.removeItem('mudhakirati-sb')}catch(e){}}
+  flushSave();if(SB){clearTimeout(SB.t);sbPush()}USER='';clearSession();if(SB){SB.tok='';try{localStorage.removeItem('mudhakirati-sb')}catch(e){}}
   TM.running=false;AU.mode='login';AU.err='';
   var lang=S.lang;S=seed();S.lang=lang;showAuth()}
 document.addEventListener('click',function(e){
@@ -1759,7 +1787,7 @@ function swTimer(){
   else swPost({type:'timer-cancel'})}
 function regDaily(){
   var on=!!(S.remind&&S.remind.on&&window.Notification&&Notification.permission==='granted');
-  swPost({type:'remind-cfg',on:on,time:(S.remind&&S.remind.time)||'18:00',title:t('app'),body:t('remindMsg')});
+  swPost({type:'remind-cfg',on:on,time:(S.remind&&S.remind.time)||'18:00',title:t('app'),body:remindBody()});
   try{if(!navigator.serviceWorker)return;navigator.serviceWorker.ready.then(function(r){
     if(!r.periodicSync)return;
     if(on)r.periodicSync.register('daily-reminder',{minInterval:6*3600*1000}).catch(function(){});
@@ -1771,8 +1799,13 @@ function pushSub(){
     return r.pushManager.getSubscription().then(function(s){return s||r.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUBLIC)})})})
   .then(function(s){window.dispatchEvent(new CustomEvent('mz-push',{detail:s.toJSON()}))}).catch(function(){})}
 document.addEventListener('visibilitychange',function(){if(document.hidden&&USER)regDaily()});
+function remindBody(){
+  var x=S.remind&&S.remind.subj?subj(S.remind.subj):null,m=t('remindMsg')+(x?' · '+x.name:''),inf=planInfo();
+  if(x&&inf&&partsTotal(x).h>0){var s=remH(x)/Math.max(1,inf.left);if(s>0)m+=' · '+t('remindShare')+': '+fmtH(s)}
+  else if(!x){var sh=todayShare();if(sh>0)m+=' · '+t('remindShare')+': '+fmtH(sh)}
+  return m}
 function remind(){
-  var sh=todayShare(),m=t('remindMsg')+(sh>0?' · '+t('remindShare')+': '+fmtH(sh):'');
+  var m=remindBody();
   showToast(m);try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}
   notify(t('app'),m,'daily-reminder');swPost({type:'remind-done'})}
 function remCheck(){
@@ -1959,7 +1992,8 @@ document.addEventListener('change',function(e){
     S.remind=S.remind||{on:false,time:'18:00',last:''};S.remind.on=e.target.checked;S.remind.last='';
     if(S.remind.on)askPerm(function(){regDaily();pushSub()});else regDaily();
     save()}
-  else if(id==='rTime'){S.remind=S.remind||{on:false,time:'18:00',last:''};S.remind.time=e.target.value||'18:00';S.remind.last='';save();regDaily()}});
+  else if(id==='rTime'){S.remind=S.remind||{on:false,time:'18:00',last:''};S.remind.time=e.target.value||'18:00';S.remind.last='';save();regDaily()}
+  else if(id==='rSubj'){S.remind=S.remind||{on:false,time:'18:00',last:''};S.remind.subj=e.target.value||'';save();regDaily()}});
 document.addEventListener('submit',function(e){
   if(e.target.id!=='fPw')return;
   var cur=document.getElementById('pwCur').value,nw=document.getElementById('pwNew').value,msg=document.getElementById('pwMsg');
@@ -2019,10 +2053,9 @@ document.addEventListener('click',function(e){
   else if(a==='fs'){var ni=FS.i+(id==='inc'?1:-1);if(ni>=0&&ni<FS.L.length){FS.i=ni;fsApply()}}
   else if(a==='layout'){S.layout=id;save();applyLayout();[].forEach.call(document.querySelectorAll('[data-a=layout]'),function(b){b.setAttribute('aria-pressed',b.getAttribute('data-id')===id)});render();requestAnimationFrame(placeInd)}
   else if(a==='theme'){
-    var nt=id?(id==='auto'?'':id):(S.theme===''||!S.theme?'light':S.theme==='light'?'dark':S.theme==='dark'?'maroon':'');
+    var nt=id?(id==='auto'?'':id):(S.theme===''||!S.theme?'light':S.theme==='light'?'dark':S.theme==='dark'?'maroon':S.theme==='maroon'?'mono':'');
     S.theme=nt;render();
-    [].forEach.call(document.querySelectorAll('[data-a=theme][data-id]'),function(b){b.setAttribute('aria-pressed',(b.getAttribute('data-id')==='auto'?'':b.getAttribute('data-id'))===S.theme)});
-    if(!id)showToast(t('themeT')+': '+(S.theme==='dark'?t('thDark'):S.theme==='light'?t('thLight'):S.theme==='maroon'?t('thMaroon'):t('thAuto')))}
+    [].forEach.call(document.querySelectorAll('[data-a=theme][data-id]'),function(b){b.setAttribute('aria-pressed',(b.getAttribute('data-id')==='auto'?'':b.getAttribute('data-id'))===S.theme)});}
   else if(a==='pdone'){var pp=id.split('|'),sbj=subj(pp[0]);if(!sbj)return;(sbj.parts||[]).forEach(function(q){if(q.id===pp[1])q.done=!q.done});render()}
   else if(a==='edittask'){UI.editTaskId=id;openSheet('task')}
   else if(a==='toastx'){document.getElementById('toast').classList.remove('show')}
@@ -2162,7 +2195,7 @@ document.addEventListener('change',function(e){
   var id=e.target.id;
   if(id==='sFocus'||id==='sBrk'||id==='sGoal'){
     var v=parseInt(e.target.value,10);if(!(v>0))return;
-    if(id==='sFocus')S.settings.focus=Math.min(120,v);else if(id==='sBrk')S.settings.brk=Math.min(60,v);else S.settings.goal=v;
+    if(id==='sFocus')S.settings.focus=v;else if(id==='sBrk')S.settings.brk=Math.min(60,v);else S.settings.goal=v;
     if(!TM.running)setMode(TM.mode);
     save();if(S.view==='timer')paintTimer()}
 });

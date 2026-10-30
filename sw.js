@@ -1,6 +1,6 @@
 /* مذاكرتي — service worker: الواجهة تُخزَّن للعمل بدون إنترنت.
    غيّر رقم VER عند كل تحديث للتطبيق حتى يصل التحديث للمستخدمين. */
-const VER = 'mudhakirati-v9-7';
+const VER = 'mudhakirati-v9-15';
 const SHELL_CACHE = 'shell-' + VER;
 const FONT_CACHE = 'fonts-v1';
 const CFG_CACHE = 'cfg-v1';   /* إعدادات التذكير اليومي (تبقى بعد إيقاف الـ worker) */
@@ -39,14 +39,14 @@ self.addEventListener('fetch', e => {
 
   if (url.origin !== location.origin) return;
 
-  /* فتح الصفحة: الشبكة أولاً (لتصل التحديثات) ثم النسخة المخزَّنة بلا إنترنت */
+  /* فتح الصفحة: النسخة المخزَّنة فوراً (أسرع ما يمكن) وتتحدّث بالخلفية للفتحة الجاية */
   if (req.mode === 'navigate') {
-    e.respondWith(
-      fetch(req).then(r => {
-        if (r && r.ok) { const copy = r.clone(); caches.open(SHELL_CACHE).then(c => c.put('index.html', copy)); }
-        return r;
-      }).catch(() => caches.match('index.html').then(r => r || caches.match('./')))
-    );
+    e.respondWith(caches.open(SHELL_CACHE).then(async c => {
+      const hit = (await c.match('index.html')) || (await c.match('./'));
+      const net = fetch(req).then(r => { if (r && r.ok) c.put('index.html', r.clone()); return r; }).catch(() => null);
+      if (hit) { e.waitUntil(net); return hit; }
+      return (await net) || Response.error();
+    }));
     return;
   }
 
