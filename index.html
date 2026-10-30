@@ -1783,13 +1783,13 @@ function fullSect(){
   var hd='<div class="sect"><h3>'+pkL('الشاشة الكاملة','Full screen')+'</h3>';
   if(!fsSupported())return hd+'<div class="small muted">'+pkL('متصفحك ما يدعم الشاشة الكاملة. ثبّت التطبيق على الشاشة الرئيسية حتى يفتح بدون شريط المتصفح.','Your browser does not support full screen. Install the app to your home screen to open it without the browser bar.')+'</div></div>';
   return hd+'<button type="button" class="btn ghost prbtn" id="fullBtn" data-a="fullscr">'+ic('monitor',20)+'<span>'+fullLabel()+'</span></button>'+
-    '<label class="row" style="gap:10px;font-weight:700"><input type="checkbox" id="aFull"'+(S.autoFull?' checked':'')+'>'+pkL('افتح بالشاشة الكاملة تلقائيًا','Open in full screen automatically')+'</label></div>'}
+    '<label class="row" style="gap:10px;font-weight:700"><input type="checkbox" id="aFull"'+(S.autoFull!==false?' checked':'')+'>'+pkL('افتح بالشاشة الكاملة تلقائيًا','Open in full screen automatically')+'</label></div>'}
 function syncFull(){var b=document.querySelector('#fullBtn span');if(b)b.textContent=fullLabel()}
 document.addEventListener('fullscreenchange',syncFull);document.addEventListener('webkitfullscreenchange',syncFull);
 var AUTOF=false;
 document.addEventListener('click',function(){
   if(AUTOF||!USER)return;AUTOF=true;
-  if(S.autoFull&&fsSupported()&&!isFull())enterFull()},true);
+  if(S.autoFull!==false&&fsSupported()&&!isFull())enterFull()},true);
 document.addEventListener('change',function(e){
   if(e.target.id!=='aFull')return;S.autoFull=e.target.checked;save();
   if(S.autoFull&&!isFull())enterFull()});
