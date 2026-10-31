@@ -1,6 +1,6 @@
 /* مذاكرتي — service worker: الواجهة تُخزَّن للعمل بدون إنترنت.
    غيّر رقم VER عند كل تحديث للتطبيق حتى يصل التحديث للمستخدمين. */
-const VER = 'mudhakirati-v9-42';
+const VER = 'mudhakirati-v9-43';
 const SHELL_CACHE = 'shell-' + VER;
 const FONT_CACHE = 'fonts-v1';
 const CFG_CACHE = 'cfg-v1';   /* إعدادات التذكير اليومي (تبقى بعد إيقاف الـ worker) */
@@ -11,7 +11,7 @@ const SHELL = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(SHELL_CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(SHELL_CACHE).then(c => c.addAll(SHELL.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {

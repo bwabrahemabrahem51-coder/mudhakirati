@@ -917,6 +917,27 @@ html.sa #splash{display:flex}
 .sw2 .chip{border-color:var(--c);color:var(--ink)}
 .ta{width:100%;min-height:110px;border-radius:18px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);padding:12px 14px;font:inherit;resize:vertical}
 
+
+/* ---- menu smoothness ---- */
+.nav .ind{transition:transform .5s cubic-bezier(.34,1.25,.5,1),width .4s var(--ios),height .4s var(--ios),background-color .25s}
+.nav button{transition:color .3s var(--ios),transform .25s var(--ios),background-color .25s}
+.nav button span{transition:opacity .3s var(--ios),transform .3s var(--ios)}
+.nav button svg{transition:transform .45s cubic-bezier(.34,1.45,.5,1),color .3s var(--ios)}
+.nav button:active:not(:disabled){transform:scale(.93)}
+.nav button:not([aria-current=page]) span{opacity:.85}
+.nav button[aria-current=page] span{opacity:1;font-weight:700}
+@media (hover:hover){
+  .nav button:not([aria-current=page]):hover{color:var(--ink)}
+  .nav button:not([aria-current=page]):hover svg{transform:translateY(-2px) scale(1.06)}
+}
+@media (min-width:900px){
+  .nav button{transition:color .3s var(--ios),transform .25s var(--ios),background-color .25s,padding-inline-start .3s var(--ios)}
+  .nav button:not([aria-current=page]):hover{background:color-mix(in srgb,var(--soft) 45%,transparent)}
+  .nav button:not([aria-current=page]):hover svg{transform:scale(1.08)}
+}
+#view.enter{animation:vfade .34s var(--ios) both}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#view.enter{animation:none}.nav button,.nav button svg,.nav .ind{transition:none}}
 </style>
 </head>
 <body>
@@ -1111,7 +1132,7 @@ function thRow(id){return ThemeManager.row(id)}
 
 var TM={mode:'focus',running:false,endAt:0,left:S.settings.focus*60,total:S.settings.focus*60,subj:S.subjects[0]?S.subjects[0].id:'',iv:null};
 var UI={filter:'open',confirm:'',newColor:COLORS[3],sheet:'',editId:'',pPhoto:'',editTaskId:'',editRv:'',q:'',fs:'',fp:'',fd:'',pm:0,pd:''};
-var LAST={},D=0,CT=2*Math.PI*112,CH=2*Math.PI*54;
+var LAST={},D=0,CT=2*Math.PI*112,CHR=2*Math.PI*54;
 
 function minsOn(date,sid){var n=0;S.logs.forEach(function(l){if(l.date===date&&(!sid||l.subj===sid))n+=l.min});return n}
 function weekMins(sid){var n=0;for(var i=0;i<7;i++)n+=minsOn(addDays(-i),sid);return n}
@@ -1219,7 +1240,7 @@ function vHome(){
    '<div class="big num" data-n="'+m+'" data-k="heroN">0</div><span class="of num">'+(m>=g?t('reached'):t('of')+' '+g+' '+t('min'))+'</span>'+
    '<button class="go" data-a="nav" data-id="timer">'+ic('play',16)+t('startSession')+'</button></div>'+
    '<div class="ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="11"/>'+
-   '<circle class="p" cx="60" cy="60" r="54" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-dasharray="'+CH.toFixed(1)+'" data-o="'+(CH*(1-pct/100)).toFixed(1)+'" data-k="heroR" data-init="'+CH.toFixed(1)+'"/></svg><b class="num">'+pct+'%</b></div></section>';
+   '<circle class="p" cx="60" cy="60" r="54" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-dasharray="'+CHR.toFixed(1)+'" data-o="'+(CHR*(1-pct/100)).toFixed(1)+'" data-k="heroR" data-init="'+CHR.toFixed(1)+'"/></svg><b class="num">'+pct+'%</b></div></section>';
   h+=planCard();
   h+=splitCard();
   h+=reviewCard();
@@ -1747,9 +1768,14 @@ function applyAnims(){
 
 function placeInd(){
   var b=document.querySelector('#nav button[aria-current=page]'),ind=document.getElementById('ind'),p=document.getElementById('nav');
-  if(!b)return;var r=b.getBoundingClientRect(),q=p.getBoundingClientRect(),side=isSide();
+  if(!b)return;var r=b.getBoundingClientRect(),q=p.getBoundingClientRect(),side=isSide(),first=!ind.getAttribute('data-p');
+  if(first){ind.style.transition='none';ind.setAttribute('data-p','1')}
   ind.style.width=r.width+'px';ind.style.height=side?r.height+'px':'';
-  ind.style.transform='translate('+(r.left-q.left-p.clientLeft)+'px,'+(side?r.top-q.top-p.clientTop:0)+'px)'}
+  ind.style.transform='translate('+(r.left-q.left-p.clientLeft)+'px,'+(side?r.top-q.top-p.clientTop:0)+'px)';
+  if(first){void ind.offsetWidth;ind.style.transition=''}}
+function syncNav(){
+  [].forEach.call(document.querySelectorAll('#nav button'),function(b){if(b.getAttribute('data-id')===S.view)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+  placeInd()}
 
 /* ---------- render ---------- */
 var navBuilt=false,enterT;
@@ -2383,7 +2409,7 @@ document.addEventListener('click',function(e){
   var el=e.target.closest('[data-a]');if(!el)return;
   var a=el.getAttribute('data-a'),id=el.getAttribute('data-id');
   if(/^(color|addpart|delpart|delphoto)$/.test(a))UI.dirty=true;
-  if(a==='nav'){if(id===S.view)return;S.view=id;UI.confirm='';window.scrollTo({top:0,behavior:'auto'});render(true)}
+  if(a==='nav'){if(id===S.view)return;S.view=id;UI.confirm='';window.scrollTo({top:0,behavior:'auto'});syncNav();requestAnimationFrame(function(){render(true)})}
   else if(a==='setlang'){
     if(S.lang===id)return;S.lang=id;try{localStorage.setItem(LANG_K,S.lang)}catch(x){}render(true);
     if(UI.sheet==='profile'){var sb2=document.getElementById('sheetBody');sb2.innerHTML=sheetHtml('profile');enhancePickers();var h2=sb2.querySelector('h2,h3');if(h2)h2.id='sheetTitle'}}
