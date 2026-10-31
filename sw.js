@@ -1,6 +1,6 @@
 /* مذاكرتي — service worker: الواجهة تُخزَّن للعمل بدون إنترنت.
    غيّر رقم VER عند كل تحديث للتطبيق حتى يصل التحديث للمستخدمين. */
-const VER = 'mudhakirati-v9-15';
+const VER = 'mudhakirati-v9-33';
 const SHELL_CACHE = 'shell-' + VER;
 const FONT_CACHE = 'fonts-v1';
 const CFG_CACHE = 'cfg-v1';   /* إعدادات التذكير اليومي (تبقى بعد إيقاف الـ worker) */
@@ -42,8 +42,10 @@ self.addEventListener('fetch', e => {
   /* فتح الصفحة: النسخة المخزَّنة فوراً (أسرع ما يمكن) وتتحدّث بالخلفية للفتحة الجاية */
   if (req.mode === 'navigate') {
     e.respondWith(caches.open(SHELL_CACHE).then(async c => {
-      const hit = (await c.match('index.html')) || (await c.match('./'));
-      const net = fetch(req).then(r => { if (r && r.ok) c.put('index.html', r.clone()); return r; }).catch(() => null);
+      /* نسخة التلفاز (index-tv.html) تُخزَّن باسمها حتى لا تُستبدل بنسخة التلفون */
+      const key = /index-tv\.html$/.test(url.pathname) ? 'index-tv.html' : 'index.html';
+      const hit = (await c.match(key)) || (key === 'index.html' ? await c.match('./') : null);
+      const net = fetch(req).then(r => { if (r && r.ok) c.put(key, r.clone()); return r; }).catch(() => null);
       if (hit) { e.waitUntil(net); return hit; }
       return (await net) || Response.error();
     }));
