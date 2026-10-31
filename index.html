@@ -398,6 +398,11 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .kpi.hot b{color:var(--hot)}
 .stack{display:flex;height:14px;border-radius:99px;overflow:hidden;background:var(--track);gap:2px}
 .stack i{display:block;height:100%;width:0;transition:width .9s var(--ease)}
+.nowc{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-radius:18px;background:var(--soft)}
+.nowc b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--accent-text)}
+.frform input.nowin{direction:auto;text-transform:none;letter-spacing:0}
+.rdn{display:flex;align-items:center;gap:5px;margin-top:3px;font-size:calc(12.5px*var(--fs,1));font-weight:600;color:var(--accent-text)}
+.rdn span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lg{display:flex;align-items:center;gap:10px;padding-block:6px}
 .lg i{width:10px;height:10px;border-radius:50%;flex:none}
 
@@ -817,6 +822,8 @@ html.sa #splash{display:flex}
 .auth .feats{margin-top:12px}
 .auth .intro-b{margin-top:22px}
 /* ===== مساحتي: schedule · friends streak · notes ===== */
+.lg{display:flex;flex-direction:column;gap:6px;font-size:calc(12.5px*var(--fs,1));color:var(--muted)}
+.lg span{display:flex;align-items:center;gap:6px}
 .hubh{display:flex;align-items:center;gap:8px}
 .hubh svg{color:var(--accent-text)}
 .sch{display:grid;grid-template-columns:22px repeat(var(--c),minmax(0,1fr));gap:5px;align-items:stretch}
@@ -982,7 +989,7 @@ function subjIcon(n){n=String(n||'').toLowerCase();
   if(/انكلي|إنكلي|انجلي|إنجلي|english/.test(n))return 'globe';
   return 'subjects'}
 function ic(n,s){s=s||22;return '<svg class="ic" width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+P[n]+'</svg>'}
-var VIEWS=['home','tasks','subjects','timer','progress','hub'];
+var VIEWS=['home','tasks','subjects','timer','hub','progress'];
 
 function dk(d){var y=d.getFullYear(),m=d.getMonth()+1,x=d.getDate();return y+'-'+(m<10?'0':'')+m+'-'+(x<10?'0':'')+x}
 function today(){return dk(new Date())}
@@ -1025,6 +1032,7 @@ function migrate(raw){
   if(sc.cells&&typeof sc.cells==='object')for(var ck in sc.cells){if(/^\d-\d{1,2}$/.test(ck)&&sc.cells[ck]&&String(sc.cells[ck].t||'').trim())o.sched.cells[ck]={t:String(sc.cells[ck].t).slice(0,30)}}
   o.notes=arr(o.notes).filter(function(n){return n&&String(n.txt||'').trim()}).map(function(n){return {id:n.id||uid(),title:String(n.title||'').slice(0,60),txt:String(n.txt).slice(0,600),color:n.color||COLORS[5],pin:!!n.pin,ts:+n.ts||0}});
   o.fid=/^[A-Z0-9]{8}$/.test(o.fid||'')?o.fid:'';
+  o.nowT=String(o.nowT||'').slice(0,60);o.nowAt=o.nowT?(+o.nowAt||0):0;
   if(o.plan&&!(+o.plan.days>0&&dre.test(o.plan.start||'')))o.plan=null;
   if(o.profile&&typeof o.profile!=='object')o.profile=null;
   o.onboarded=o.onboarded===undefined?true:!!o.onboarded;
@@ -2728,7 +2736,7 @@ function playIntro(quick){
   setTimeout(function(){el.classList.add('off');setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},700)},quick?1100:3200)}
 /* ======================= مساحتي =======================
    1) الجدول الأسبوعي  2) الستريك مع الأصدقاء (Supabase)  3) بطاقات الملاحظات المهمة */
-var FR={list:null,err:'',busy:false,sig:'',add:'',msg:'',ok:false,t:0};
+var FR={now:'',list:null,err:'',busy:false,sig:'',add:'',msg:'',ok:false,t:0};
 var DAYS_AR=['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'],DAYS_EN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 var DAYS_AR_L=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'],DAYS_EN_L=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 function fidFmt(c){return c?c.slice(0,4)+'-'+c.slice(4):''}
@@ -2742,7 +2750,10 @@ function subjColor(name){
   return '';}
 
 /* ---------- view ---------- */
-function vHub(){return schedCard()+frCard()+notesCard()}
+function vHub(){
+  var T=['sched','fr','notes'],i=T.indexOf(UI.hubTab);if(i<0){i=0;UI.hubTab='sched'}
+  var L=[pkL('الجدول','Schedule'),pkL('الأصدقاء','Friends'),pkL('الملاحظات','Notes')];
+  return '<div class="seg rise" id="segH" style="--n:3;--i:'+i+';--d:'+(D++)+'"><i class="th"></i>'+T.map(function(k,j){return '<button type="button" data-a="hubtab" data-id="'+k+'" aria-pressed="'+(j===i)+'">'+L[j]+'</button>'}).join('')+'</div>'+[schedCard,frCard,notesCard][i]()}
 function hubOpened(){if(!FR.t||Date.now()-FR.t>20000){FR.t=Date.now();frLoad()}}
 
 /* ---------- 1) weekly schedule ---------- */
@@ -2782,11 +2793,20 @@ function frLoad(){
   FR.busy=true;paintFr();
   frSync(true).then(function(){return frRpc('get_friends',{})}).then(function(r){FR.list=Array.isArray(r)?r:[];FR.err=''})
    .catch(function(e){if(!FR.err)frErr(e)}).then(function(){FR.busy=false;paintFr();var e=document.getElementById('fidVal');if(e&&S.fid)e.textContent=fidFmt(S.fid)})}
+function nowAct(t,at){return !!(t&&at&&Date.now()-at<10800000)}
+function agoTxt(at){var m=Math.max(0,Math.round((Date.now()-at)/60000));
+  if(m<1)return pkL('الآن','now');if(m<60)return pkL('قبل '+m+' د',m+' min ago');var h=Math.floor(m/60);return pkL('قبل '+h+' س',h+' h ago')}
+function nowBox(){
+  if(nowAct(S.nowT,S.nowAt))
+    return '<div class="nowc"><div style="min-width:0"><div class="small muted">'+esc(pkL('تقرا الآن (يشوفها أصدقاؤك)','Reading now (your friends see it)'))+'</div><b>'+esc(S.nowT)+'</b></div><button type="button" class="chip" data-a="nowend">'+esc(pkL('إنهاء','Done'))+'</button></div>';
+  return '<form id="fNow" class="frform"><input id="nowIn" class="nowin" maxlength="60" value="'+esc(FR.now||'')+'" placeholder="'+esc(pkL('شنو الدرس اللي راح تقراه؟','What lesson will you read?'))+'" autocomplete="off"><button class="btn" type="submit">'+esc(pkL('ابدأ','Start'))+'</button></form>'+
+    (S.subjects.length?'<div class="sw2">'+S.subjects.map(function(x,i){return '<button type="button" class="chip" style="--c:'+x.color+'" data-a="nowpick" data-id="'+i+'">'+esc(x.name)+'</button>'}).join('')+'</div>':'')}
 function frInner(){
   var me=myDays(),mine=setOf(me),ms=runLen(function(d){return mine[d]}),h='',t0=today();
   h+='<div class="sh"><h2 class="hubh">'+ic('users',20)+pkL('الستريك مع الأصدقاء','Friends streak')+'</h2><button type="button" class="chip" data-a="frref"'+(FR.busy?' disabled':'')+'>'+(FR.busy?pkL('جارٍ التحديث…','Updating…'):pkL('تحديث','Refresh'))+'</button></div>';
   h+='<div class="fr me"><div class="fav">'+esc((profName()||String(USER||'?')).trim().charAt(0).toUpperCase())+'</div><div class="grow"><div class="nm"><span class="t">'+esc(pkL('أنت','You'))+'</span>'+(mine[t0]?'<i class="dot"></i>':'')+'</div>'+
      '<div class="small muted num" dir="ltr" style="text-align:start">'+(S.fid?fidFmt(S.fid):'…')+'</div></div><div class="fs"><b class="fl num">'+ic('flame',16)+ms+'</b></div></div>';
+  h+=nowBox();
   if(FR.err==='setup')h+='<div class="frmsg">'+esc(pkL('ميزة الأصدقاء غير مفعّلة على السيرفر بعد (تحتاج تشغيل ملف SQL مرة واحدة).','Friends isn’t enabled on the server yet (run the SQL file once).'))+'</div>';
   else if(FR.err==='net')h+='<div class="frmsg">'+esc(pkL('تعذّر الاتصال، تأكد من الإنترنت وحاول مرة ثانية.','Could not connect, check your internet and retry.'))+'</div>';
   h+='<form id="fFr" class="frform" autocomplete="off"><input id="frIn" maxlength="12" value="'+esc(FR.add)+'" placeholder="'+esc(pkL('ID صديقك','Friend ID'))+'" inputmode="text" autocapitalize="characters" spellcheck="false"><button class="btn" type="submit"'+(FR.busy?' disabled':'')+'>'+pkL('إضافة','Add')+'</button></form>';
@@ -2796,10 +2816,10 @@ function frInner(){
   if(!L.length&&FR.list)h+='<div class="muted small">'+esc(pkL('ما عندك أصدقاء بعد. أضف ID صديقك وابدأوا التحدي.','No friends yet. Add a friend’s ID to start.'))+'</div>';
   h+=L.map(function(x){var nm=x.f.name||x.f.code;
     return '<div class="fr"><div class="fav">'+esc(nm.trim().charAt(0).toUpperCase())+'</div><div class="grow"><div class="nm"><span class="t">'+esc(nm)+'</span>'+(x.on?'<i class="dot" title="'+esc(pkL('درس اليوم','Studied today'))+'"></i>':'')+'</div>'+
-     '<div class="small muted num" dir="ltr" style="text-align:start">'+fidFmt(x.f.code)+'</div></div>'+
+     '<div class="small muted num" dir="ltr" style="text-align:start">'+fidFmt(x.f.code)+'</div>'+(nowAct(x.f.now_text,x.f.now_at?Date.parse(x.f.now_at):0)?'<div class="rdn">'+ic('timer',14)+'<span>'+esc(pkL('يقرا: ','Reading: ')+x.f.now_text)+' · '+agoTxt(Date.parse(x.f.now_at))+'</span></div>':'')+'</div>'+
      '<div class="fs"><b class="fl num" title="'+esc(pkL('ستريكه','Their streak'))+'">'+ic('flame',16)+x.st+'</b><b class="sh2 num" title="'+esc(pkL('ستريككم المشترك','Shared streak'))+'">'+ic('users',16)+x.sh+'</b></div>'+
      '<button type="button" class="x" data-a="frrm" data-id="'+esc(x.f.code)+'" aria-label="×">'+ic('trash',18)+'</button></div>'}).join('');
-  if(L.length)h+='<div class="small muted">'+ic('flame',13)+' '+esc(pkL('ستريك الصديق','their streak'))+' · '+ic('users',13)+' '+esc(pkL('ستريككم المشترك (أيام درستوا فيها سوا)','shared streak (days you both studied)'))+'</div>';
+  if(L.length)h+='<div class="lg"><span>'+ic('flame',14)+esc(pkL('ستريك الصديق','Their streak'))+'</span><span>'+ic('users',14)+esc(pkL('ستريككم المشترك (أيام درستوا فيها سوا)','Shared streak (days you both studied)'))+'</span></div>';
   return h}
 function frCard(){return '<section class="card rise" id="frBox" style="--d:'+(D++)+'">'+frInner()+'</section>'}
 function paintFr(){var e=document.getElementById('frBox');if(!e)return;var f=document.activeElement,keep=f&&f.id==='frIn';e.innerHTML=frInner();if(keep){var n=document.getElementById('frIn');if(n){n.focus();try{n.setSelectionRange(n.value.length,n.value.length)}catch(x){}}}}
@@ -2828,12 +2848,16 @@ function hubSheet(k){
      '<button class="btn" type="submit">'+t('saveBtn')+'</button>'+(en?'<button class="btn ghost" type="button" data-a="ndel">'+pkL('حذف','Delete')+'</button>':'')+'</form>'}
   return ''}
 
+setInterval(function(){var a=document.activeElement;if(USER&&!document.hidden&&S.view==='hub'&&UI.hubTab==='fr'&&!FR.busy&&!UI.sheet&&!(a&&/INPUT|TEXTAREA/.test(a.tagName)))frLoad()},60000);
 /* ---------- events ---------- */
-document.addEventListener('input',function(e){if(e.target&&e.target.id==='frIn'){FR.add=e.target.value;FR.msg=''}});
+document.addEventListener('input',function(e){if(e.target&&e.target.id==='frIn'){FR.add=e.target.value;FR.msg=''}else if(e.target&&e.target.id==='nowIn')FR.now=e.target.value});
 document.addEventListener('click',function(e){
   var el=e.target.closest&&e.target.closest('[data-a]');if(!el)return;
   var a=el.getAttribute('data-a'),id=el.getAttribute('data-id');
-  if(a==='schcell'){UI.schKey=id;openSheet('schcell')}
+  if(a==='hubtab'){if(UI.hubTab!==id){UI.hubTab=id;render()}}
+  else if(a==='schcell'){UI.schKey=id;openSheet('schcell')}
+  else if(a==='nowpick'){var ni=document.getElementById('nowIn'),sj=S.subjects[+id];if(ni&&sj){ni.value=sj.name+(ni.value&&ni.value.indexOf(sj.name)!==0?' - '+ni.value:'');FR.now=ni.value;ni.focus()}}
+  else if(a==='nowend'){S.nowT='';S.nowAt=0;save();paintFr();frRpc('set_status',{p_text:''}).catch(frErr).then(function(){frLoad()})}
   else if(a==='schsat'){S.sched.sat=!S.sched.sat;render()}
   else if(a==='schn'){S.sched.n=Math.min(12,Math.max(1,S.sched.n+(+id)));
     for(var ck in S.sched.cells){if(+ck.split('-')[1]>=S.sched.n)delete S.sched.cells[ck]}render()}
@@ -2868,6 +2892,10 @@ document.addEventListener('submit',function(e){
     if(en){en.title=tv.title;en.txt=tv.txt;en.color=tv.color;en.pin=tv.pin}
     else S.notes.push({id:uid(),title:tv.title,txt:tv.txt,color:tv.color,pin:tv.pin,ts:Date.now()});
     closeSheet();render()}
+  else if(id==='fNow'){e.preventDefault();
+    var nt=document.getElementById('nowIn').value.trim().slice(0,60);if(!nt)return;
+    S.nowT=nt;S.nowAt=Date.now();FR.now='';save();paintFr();
+    frSync(true).then(function(){return frRpc('set_status',{p_text:nt})}).catch(frErr).then(function(){frLoad()})}
   else if(id==='fFr'){e.preventDefault();
     var code=document.getElementById('frIn').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
     FR.ok=false;
