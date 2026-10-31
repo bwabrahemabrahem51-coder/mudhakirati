@@ -1,6 +1,6 @@
 /* مذاكرتي — service worker: الواجهة تُخزَّن للعمل بدون إنترنت.
    غيّر رقم VER عند كل تحديث للتطبيق حتى يصل التحديث للمستخدمين. */
-const VER = 'mudhakirati-v9-33';
+const VER = 'mudhakirati-v9-37';
 const SHELL_CACHE = 'shell-' + VER;
 const FONT_CACHE = 'fonts-v1';
 const CFG_CACHE = 'cfg-v1';   /* إعدادات التذكير اليومي (تبقى بعد إيقاف الـ worker) */
