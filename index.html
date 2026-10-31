@@ -86,6 +86,7 @@ try{var _st=ThemeManager.stored();ThemeManager.apply(_st.theme,_st.palette,false
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap"></noscript>
 <style>
+
 /* Layout: floating pill nav with sliding indicator, one FAB opening bottom sheets, big blue hero card. Every state change animates. */
 :root{
   --bg:#F1F3F9; --surface:#FFFFFF; --ink:#0D1226; --muted:#6A7189; --line:#E3E7F0;
@@ -684,6 +685,16 @@ button.strk:active{transform:scale(.95)}
 .chm{max-width:82%;padding:8px 12px;border-radius:16px;background:var(--surface);border:1px solid var(--line);font-size:calc(14.5px*var(--fs,1));line-height:1.5;word-break:break-word;align-self:flex-start;white-space:pre-wrap}
 .chm.me{align-self:flex-end;background:var(--accent);border-color:transparent;color:var(--accent-ink)}
 .chm.cheer{font-weight:800}
+@media (max-width:899px){
+.sheet.full{top:auto;height:var(--vvh,100vh);max-height:none;border-radius:0;overflow:hidden;display:flex;flex-direction:column;padding-top:calc(10px + env(safe-area-inset-top,0px))}
+.sheet.full .grab{display:none}
+.sheet.full #sheetBody{flex:1;min-height:0;display:flex;flex-direction:column}
+.sheet.full .chbox{flex:1;min-height:0;display:flex;flex-direction:column}
+.sheet.full .chl{flex:1;height:auto;min-height:0}
+}
+.chh{align-items:center}
+.chh .fav{width:44px;height:44px;flex:none;border-radius:50%;background:var(--soft);color:var(--accent-text);display:grid;place-items:center;font-weight:800}
+.chh h2{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chm .tm{display:block;margin-top:2px;font-size:11px;opacity:.65;text-align:end;white-space:normal}
 .chq{display:flex;gap:6px;overflow-x:auto;padding:2px 0}
 .chq .chip{white-space:nowrap;flex:none}
@@ -909,6 +920,20 @@ html.sa #splash{display:flex}
 .fr .fs b.fl{color:var(--hot)}
 .fr .fs b.sh2{color:var(--accent-text)}
 .fr.me{border-top:0;padding-top:2px}
+.fav{overflow:hidden}
+.fav img{width:100%;height:100%;object-fit:cover;display:block}
+.rqh{display:flex;align-items:center;gap:8px;margin-top:14px;font-weight:800;color:var(--accent-text)}
+.rqh b{margin-inline-start:auto;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--hot);color:#fff;font-size:12px;display:grid;place-items:center;line-height:1}
+.rqc{display:flex;flex-direction:column;gap:12px;padding:14px;margin-top:10px;border:1.5px solid var(--line);border-radius:20px;background:var(--surface)}
+.rqc .top{display:flex;align-items:center;gap:14px;min-width:0}
+.rqc .fav.lg{width:60px;height:60px;flex:none;border-radius:50%;background:var(--soft);color:var(--accent-text);display:grid;place-items:center;font-weight:800;font-size:calc(22px*var(--fs,1))}
+.rqc .nm{font-weight:800;display:flex;min-width:0}
+.rqc .nm .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rqb{display:flex;gap:8px}
+.rqb .btn{flex:1;height:44px;font-size:calc(14.5px*var(--fs,1))}
+.rqo{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.rqor{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-block:6px;border-top:1px solid var(--line)}
+.rqor .t{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .ngrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .nc{text-align:start;border:0;border-radius:18px;padding:12px;background:color-mix(in srgb,var(--c) 14%,var(--surface));border-inline-start:4px solid var(--c);color:var(--ink);display:flex;flex-direction:column;gap:6px;min-height:84px;font:inherit}
 .nc b{font-size:calc(14px*var(--fs,1));display:flex;align-items:center;gap:6px}
@@ -938,6 +963,19 @@ html.sa #splash{display:flex}
 #view.enter{animation:vfade .34s var(--ios) both}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){#view.enter{animation:none}.nav button,.nav button svg,.nav .ind{transition:none}}
+/* ===== performance (phone WebView): no live blur, no "transition:all", fewer GPU layers ===== */
+.nav{-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}
+.nav .in{box-shadow:0 8px 20px -12px rgba(10,14,28,.45)}
+.auth .intro-b .btn.out{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--surface)}
+/* the two glowing blobs of the welcome screen: soft gradient instead of filter:blur(70px) (blur is re-computed on the GPU every frame while it animates) */
+.auth::before,.auth::after{filter:none;will-change:transform}
+.auth::before{width:480px;height:480px;top:-160px;inset-inline-end:-150px;background:radial-gradient(circle,var(--accent) 0,transparent 68%)}
+.auth::after{width:440px;height:440px;bottom:-150px;inset-inline-start:-140px;background:radial-gradient(circle,var(--secondary,#8B5CF6) 0,transparent 68%)}
+.auth .intro::before{filter:none}
+.sw button svg{transition:opacity .3s var(--spring),transform .3s var(--spring)}
+.pchip svg{transition:border-color .25s,color .25s,background-color .25s}
+/* every list row was its own permanent GPU layer: let the browser promote only what is animating */
+.trow,.tile,.scard,.kpi{backface-visibility:visible}
 </style>
 </head>
 <body>
@@ -991,7 +1029,7 @@ ar:{app:'مذاكرتي',hub:'مساحتي',home:'الرئيسية',tasks:'ال�
  overdue:'متأخرة',todayL:'اليوم',tomorrow:'غدًا',later:'لاحقًا',noDate:'بدون موعد',noSubj:'بدون مادة',noSubjects:'أضف مادة أولاً',
  focusLen:'مدة التركيز',breakLen:'مدة الاستراحة',dailyGoal:'هدف اليوم بالدقائق',perSubject:'توزيع الوقت',noTime:'لا يوجد وقت مسجل بعد',
  settings:'إعدادات المؤقت',sessions:'جلسات اليوم',taskPh:'مثال: حل تمارين الفصل الثالث',newSubject:'مادة جديدة',subjPh:'مثال: الكيمياء',
- weekOf:'هذا الأسبوع',of:'من',close:'إغلاق',totalWeek:'مجموع الأسبوع',pct:'من المهام',login:'تسجيل الدخول',register:'إنشاء حساب',email:'البريد الإلكتروني',password:'كلمة المرور',authSub:'سجّل الدخول أو أنشئ حسابًا حتى تتزامن بياناتك بين أجهزتك.',logout:'تسجيل الخروج',errEmail:'أدخل بريدًا إلكترونيًا صحيحًا',errPw:'كلمة المرور 6 أحرف على الأقل',errBad:'البريد أو كلمة المرور غير صحيحة',errExists:'هذا البريد مسجّل مسبقًا، سجّل الدخول',authNote:'الحساب وبياناته محفوظة على هذا الجهاز.',planTitle:'العد التنازلي',planSet:'ابدأ العد التنازلي',planDays:'كم يومًا باقي على الامتحان؟',planHint:'ينقص العداد يومًا كل منتصف ليل تلقائيًا. بطاقة اختيارية يمكنك إلغاؤها متى شئت.',planDay:'اليوم',dayW:'يومًا',planLeft:'متبقٍ',planDone:'حان الموعد، بالتوفيق!',daysLeft:'يوم متبقٍ',lastDay:'يوم واحد متبقٍ',planPassed:'مضى',planName:'اسم الامتحان (اختياري)',planNamePh:'مثال: الوزاري',planEdit:'تعديل',planClear:'إلغاء الخطة',planSave:'حفظ',planEmpty:'عندك امتحان قريب؟ فعّل العد التنازلي ليتناقص يومًا كل ليلة ويزيد حماسك. اختياري.',partsTitle:'تفاصيل المحاضرات (اختياري)',addPart:'إضافة فصل',partName:'اسم الفصل',partHours:'مجموع وقت المحاضرات (ساعات)',partLec:'عدد المحاضرات',partDef:'فصل',lecW:'محاضرة',splitTitle:'توزيع الدراسة اليومي',splitNeed:'حدد عدد الأيام المتاحة بالعد التنازلي ليُقسَّم وقت المحاضرات عليها.',splitToday:'حصة اليوم',remaining:'المتبقي',allDone:'اكتملت المادة',editSubj:'تفاصيل',splitHint:'اضغط ✓ بعد ما تخلص حصة اليوم لينقص من المتبقي.',saveBtn:'حفظ',daysAvail:'أيام متاحة',profile:'الإعدادات والملف الشخصي',yourName:'الاسم',namePh:'اكتب اسمك',changePhoto:'تغيير الصورة',addPhoto:'إضافة صورة',delPhoto:'حذف الصورة',accountL:'الحساب',navSet:'الإعدادات',addWhat:'ماذا تريد أن تضيف؟',regStudy:'الدراسة الاعتيادية',regHint:'مادة بهدف أسبوعي ولون، وتفاصيل محاضرات اختيارية',focusRev:'مراجعة مركزة',revHint:'فصل واحد: وقت المراجعة يُقسَّم على الأيام المتاحة وتشوف حصتك اليومية',chName:'اسم الفصل',chPh:'مثال: الفصل الأول',rvHours:'مجموع وقت مراجعة الفصل (ساعات)',rvDays:'عدد الأيام المتاحة للفصل',rvPrev:'الحصة اليومية',editRev:'تعديل المراجعة',delRv:'حذف المراجعة',late:'متأخر',addDef:'إضافة مواد السادس',editTask:'تعديل المهمة',backupT:'نسخة احتياطية',expBtn:'تصدير بياناتي',impBtn:'استيراد نسخة',backupHint:'احفظ الملف بمكان آمن، وتكدر ترجّع بياناتك منه بأي وقت أو على جهاز آخر.',impConfirm:'ستُستبدل بياناتك الحالية بالنسخة. متأكد؟',impOk:'تم استيراد النسخة',impBad:'الملف غير صالح',remindT:'تذكير يومي',remindOn:'ذكّرني بحصة اليوم',remindHint:'يصلك الإشعار حتى لو الصفحة بالخلفية. للأفضل ثبّت التطبيق على الشاشة الرئيسية.',remindMsg:'حان وقت الدراسة',focusDone:'انتهت جلسة التركيز، خذ استراحة 🎉',brkDone:'انتهت الاستراحة، ارجع للدراسة',remindShare:'حصة اليوم',pwT:'تغيير كلمة المرور',pwCur:'كلمة المرور الحالية',pwNew:'كلمة المرور الجديدة',pwSave:'تغيير',pwDone:'تم تغيير كلمة المرور',errBad2:'كلمة المرور الحالية غير صحيحة',partsDone:'فصول منجزة',searchPh:'ابحث في المهام',clearQ:'مسح البحث',allSubj:'المادة',allPri:'الأولوية',anyDate:'الموعد',clearF:'مسح الفلاتر',noMatch:'لا توجد مهام مطابقة',fSubj:'تصفية حسب المادة',fPri:'تصفية حسب الأولوية',fDate:'تصفية حسب الموعد',manualSort:'ترتيب يدوي',dragHint:'اسحب المقبض أو استخدم الأسهم لترتيب المهام',dragH:'اسحب لإعادة الترتيب',moveUp:'نقل للأعلى',moveDown:'نقل للأسفل',pWeek:'أسبوع',pMonth:'شهر',mTotal:'مجموع الشهر',vsPrev:'عن الشهر الماضي',mActive:'أيام دراسة',mGoalDays:'أيام حققت الهدف',mDetails:'تفاصيل الشهر',mBest:'أفضل يوم',mStreak:'أطول سلسلة',mAvgStudy:'متوسط يوم الدراسة',mSess:'عدد الجلسات',mGoalLine:'الهدف',mHit:'حققت الهدف',mHint:'اضغط أو اسحب على الأعمدة لعرض كل يوم',mPrev:'الشهر السابق',mNext:'الشهر التالي',vList:'قائمة',vWeek:'أسبوعي',wkPrev:'الأسبوع السابق',wkNext:'الأسبوع التالي',wkAdd:'إضافة مهمة لهذا اليوم',wkEmpty:'لا مهام',wkStudy:'دراسة',wkTasks:'مهام',themeT:'ثيم',thAuto:'تلقائي',thLight:'فاتح',thDark:'داكن',thMaroon:'ماروني',thMono:'أسود وأبيض',thOlive:'زيتوني',thSand:'بيجي وبرتقالي',thNavy:'كحلي وكريمي',thPine:'صنوبري وبيجي',thWine:'عنابي وذهبي',thArctic:'أزرق ثلجي',thOcean:'بحري وتركوازي',thLava:'برتقالي ناري',thRuby:'خمري وياقوتي',thCustom:'مخصص',palT:'لوحة الألوان',prevT:'معاينة الألوان',exportT:'تصدير إلى Excel / CSV',xlsBtn:'Excel (‎.xls) كل الجداول',csvLog:'CSV سجل الدراسة',csvTasks:'CSV المهام',shTasks:'المهام',shSubj:'المواد',shLog:'سجل الدراسة',cTitle:'المهمة',cSubj:'المادة',cDue:'الموعد',cPri:'الأولوية',cStatus:'الحالة',cName:'الاسم',cTarget:'الهدف الأسبوعي (ساعة)',cWeekMin:'دقائق هذا الأسبوع',cTotMin:'مجموع الدقائق',cDate:'التاريخ',cMin:'الدقائق',exOk:'تم تجهيز الملف'},
+ weekOf:'هذا الأسبوع',of:'من',close:'إغلاق',totalWeek:'مجموع الأسبوع',pct:'من المهام',login:'تسجيل الدخول',register:'إنشاء حساب',email:'البريد الإلكتروني',password:'كلمة المرور',authSub:'سجّل الدخول أو أنشئ حسابًا حتى تتزامن بياناتك بين أجهزتك.',logout:'تسجيل الخروج',errEmail:'أدخل بريدًا إلكترونيًا صحيحًا',errPw:'كلمة المرور 6 أحرف على الأقل',errBad:'البريد أو كلمة المرور غير صحيحة',errExists:'هذا البريد مسجّل مسبقًا، سجّل الدخول',authNote:'الحساب وبياناته محفوظة على هذا الجهاز.',planTitle:'العد التنازلي',planSet:'ابدأ العد التنازلي',planDays:'كم يومًا باقي على الامتحان؟',planHint:'ينقص العداد يومًا كل منتصف ليل تلقائيًا. بطاقة اختيارية يمكنك إلغاؤها متى شئت.',planDay:'اليوم',dayW:'يومًا',planLeft:'متبقٍ',planDone:'حان الموعد، بالتوفيق!',daysLeft:'يوم متبقٍ',lastDay:'يوم واحد متبقٍ',planPassed:'مضى',planName:'اسم الامتحان (اختياري)',planNamePh:'مثال: الوزاري',planEdit:'تعديل',planClear:'إلغاء الخطة',planSave:'حفظ',planEmpty:'عندك امتحان قريب؟ فعّل العد التنازلي ليتناقص يومًا كل ليلة ويزيد حماسك. اختياري.',partsTitle:'تفاصيل المحاضرات (اختياري)',addPart:'إضافة فصل',partName:'اسم الفصل',partHours:'مجموع وقت المحاضرات (ساعات)',partLec:'عدد المحاضرات',partDef:'فصل',lecW:'محاضرة',splitTitle:'توزيع الدراسة اليومي',splitNeed:'حدد عدد الأيام المتاحة بالعد التنازلي ليُقسَّم وقت المحاضرات عليها.',splitToday:'حصة اليوم',remaining:'المتبقي',allDone:'اكتملت المادة',editSubj:'تفاصيل',splitHint:'اضغط ✓ بعد ما تخلص حصة اليوم لينقص من المتبقي.',saveBtn:'حفظ',daysAvail:'أيام متاحة',profile:'الإعدادات والملف الشخصي',yourName:'الاسم',namePh:'اكتب اسمك',changePhoto:'تغيير الصورة',addPhoto:'إضافة صورة',delPhoto:'حذف الصورة',accountL:'الحساب',navSet:'الإعدادات',addWhat:'ماذا تريد أن تضيف؟',regStudy:'الدراسة الاعتيادية',regHint:'مادة بهدف أسبوعي ولون، وتفاصيل محاضرات اختيارية',focusRev:'مراجعة مركزة',revHint:'فصل واحد: وقت المراجعة يُقسَّم على الأيام المتاحة وتشوف حصتك اليومية',chName:'اسم الفصل',chPh:'مثال: الفصل الأول',rvHours:'مجموع وقت مراجعة الفصل (ساعات)',rvDays:'عدد الأيام المتاحة للفصل',rvPrev:'الحصة اليومية',editRev:'تعديل المراجعة',delRv:'حذف المراجعة',late:'متأخر',addDef:'إضافة مواد السادس',editTask:'تعديل المهمة',backupT:'نسخة احتياطية',expBtn:'تصدير بياناتي',impBtn:'استيراد نسخة',backupHint:'احفظ الملف بمكان آمن، وتكدر ترجّع بياناتك منه بأي وقت أو على جهاز آخر.',impConfirm:'ستُستبدل بياناتك الحالية بالنسخة. متأكد؟',impOk:'تم استيراد النسخة',impBad:'الملف غير صالح',remindT:'تذكير يومي',remindOn:'ذكّرني بحصة اليوم',remindHint:'يصلك الإشعار حتى لو الصفحة بالخلفية. للأفضل ثبّت التطبيق على الشاشة الرئيسية.',remindMsg:'حان وقت الدراسة',focusDone:'انتهت جلسة التركيز، خذ استراحة 🎉',brkDone:'انتهت الاستراحة ⏰ ابدأ التايمر وروح ادرس 📚',remindShare:'حصة اليوم',pwT:'تغيير كلمة المرور',pwCur:'كلمة المرور الحالية',pwNew:'كلمة المرور الجديدة',pwSave:'تغيير',pwDone:'تم تغيير كلمة المرور',errBad2:'كلمة المرور الحالية غير صحيحة',partsDone:'فصول منجزة',searchPh:'ابحث في المهام',clearQ:'مسح البحث',allSubj:'المادة',allPri:'الأولوية',anyDate:'الموعد',clearF:'مسح الفلاتر',noMatch:'لا توجد مهام مطابقة',fSubj:'تصفية حسب المادة',fPri:'تصفية حسب الأولوية',fDate:'تصفية حسب الموعد',manualSort:'ترتيب يدوي',dragHint:'اسحب المقبض أو استخدم الأسهم لترتيب المهام',dragH:'اسحب لإعادة الترتيب',moveUp:'نقل للأعلى',moveDown:'نقل للأسفل',pWeek:'أسبوع',pMonth:'شهر',mTotal:'مجموع الشهر',vsPrev:'عن الشهر الماضي',mActive:'أيام دراسة',mGoalDays:'أيام حققت الهدف',mDetails:'تفاصيل الشهر',mBest:'أفضل يوم',mStreak:'أطول سلسلة',mAvgStudy:'متوسط يوم الدراسة',mSess:'عدد الجلسات',mGoalLine:'الهدف',mHit:'حققت الهدف',mHint:'اضغط أو اسحب على الأعمدة لعرض كل يوم',mPrev:'الشهر السابق',mNext:'الشهر التالي',vList:'قائمة',vWeek:'أسبوعي',wkPrev:'الأسبوع السابق',wkNext:'الأسبوع التالي',wkAdd:'إضافة مهمة لهذا اليوم',wkEmpty:'لا مهام',wkStudy:'دراسة',wkTasks:'مهام',themeT:'ثيم',thAuto:'تلقائي',thLight:'فاتح',thDark:'داكن',thMaroon:'ماروني',thMono:'أسود وأبيض',thOlive:'زيتوني',thSand:'بيجي وبرتقالي',thNavy:'كحلي وكريمي',thPine:'صنوبري وبيجي',thWine:'عنابي وذهبي',thArctic:'أزرق ثلجي',thOcean:'بحري وتركوازي',thLava:'برتقالي ناري',thRuby:'خمري وياقوتي',thCustom:'مخصص',palT:'لوحة الألوان',prevT:'معاينة الألوان',exportT:'تصدير إلى Excel / CSV',xlsBtn:'Excel (‎.xls) كل الجداول',csvLog:'CSV سجل الدراسة',csvTasks:'CSV المهام',shTasks:'المهام',shSubj:'المواد',shLog:'سجل الدراسة',cTitle:'المهمة',cSubj:'المادة',cDue:'الموعد',cPri:'الأولوية',cStatus:'الحالة',cName:'الاسم',cTarget:'الهدف الأسبوعي (ساعة)',cWeekMin:'دقائق هذا الأسبوع',cTotMin:'مجموع الدقائق',cDate:'التاريخ',cMin:'الدقائق',exOk:'تم تجهيز الملف'},
 en:{app:'Mudhakirati',hub:'My Space',home:'Home',tasks:'Tasks',subjects:'Subjects',timer:'Timer',progress:'Progress',
  g:['Good morning','Good afternoon','Good evening','Good night'],
  goal:'Today’s goal',min:'min',hrs:'h',reached:'Daily goal reached',startSession:'Start session',
@@ -1004,7 +1042,7 @@ en:{app:'Mudhakirati',hub:'My Space',home:'Home',tasks:'Tasks',subjects:'Subject
  overdue:'Overdue',todayL:'Today',tomorrow:'Tomorrow',later:'Later',noDate:'No date',noSubj:'No subject',noSubjects:'Add a subject first',
  focusLen:'Focus length',breakLen:'Break length',dailyGoal:'Daily goal in minutes',perSubject:'Time split',noTime:'No time logged yet',
  settings:'Timer settings',sessions:'Sessions today',taskPh:'e.g. Chapter 3 exercises',newSubject:'New subject',subjPh:'e.g. Chemistry',
- weekOf:'this week',of:'of',close:'Close',totalWeek:'Week total',pct:'of tasks',login:'Log in',register:'Sign up',email:'Email',password:'Password',authSub:'Log in or create an account so your data syncs across your devices.',logout:'Log out',errEmail:'Enter a valid email',errPw:'Password must be at least 6 characters',errBad:'Wrong email or password',errExists:'This email is already registered, log in',authNote:'Your account and data are stored on this device.',planTitle:'Countdown',planSet:'Start countdown',planDays:'How many days until the exam?',planHint:'The counter drops one day every midnight. Optional, cancel any time.',planDay:'Day',dayW:'days',planLeft:'left',planDone:'It’s time, good luck!',daysLeft:'days left',lastDay:'1 day left',planPassed:'elapsed',planName:'Exam name (optional)',planNamePh:'e.g. Final exam',planEdit:'Edit',planClear:'Cancel plan',planSave:'Save',planEmpty:'Have an exam coming up? Turn on the countdown, it drops a day every night. Optional.',partsTitle:'Lecture details (optional)',addPart:'Add chapter',partName:'Chapter name',partHours:'Total lecture time (hours)',partLec:'Number of lectures',partDef:'Chapter',lecW:'lectures',splitTitle:'Daily study split',splitNeed:'Set the available days with the countdown so lecture time can be divided across them.',splitToday:'Today’s share',remaining:'Remaining',allDone:'Subject complete',editSubj:'Details',splitHint:'Tap ✓ after finishing today’s share to reduce what’s left.',saveBtn:'Save',daysAvail:'days available',profile:'Settings & profile',yourName:'Name',namePh:'Enter your name',changePhoto:'Change photo',addPhoto:'Add photo',delPhoto:'Remove photo',accountL:'Account',navSet:'Settings',addWhat:'What do you want to add?',regStudy:'Regular study',regHint:'A subject with a weekly target, color and optional lecture details',focusRev:'Focused review',revHint:'One chapter: review time is divided across the available days to give your daily share',chName:'Chapter name',chPh:'e.g. Chapter 1',rvHours:'Total review time for the chapter (hours)',rvDays:'Days available for the chapter',rvPrev:'Daily share',editRev:'Edit review',delRv:'Delete review',late:'Overdue',addDef:'Add 6th-grade subjects',editTask:'Edit task',backupT:'Backup',expBtn:'Export my data',impBtn:'Import backup',backupHint:'Keep the file somewhere safe. You can restore your data from it any time or on another device.',impConfirm:'Your current data will be replaced by the backup. Sure?',impOk:'Backup imported',impBad:'Invalid file',remindT:'Daily reminder',remindOn:'Remind me of today’s share',remindHint:'You get the notification even with the page in the background. For best results, install the app to your home screen.',remindMsg:'Time to study',focusDone:'Focus session finished, take a break 🎉',brkDone:'Break is over, back to studying',remindShare:'Today’s share',pwT:'Change password',pwCur:'Current password',pwNew:'New password',pwSave:'Change',pwDone:'Password changed',errBad2:'Current password is wrong',partsDone:'chapters done',searchPh:'Search tasks',clearQ:'Clear search',allSubj:'Subject',allPri:'Priority',anyDate:'Date',clearF:'Clear filters',noMatch:'No matching tasks',fSubj:'Filter by subject',fPri:'Filter by priority',fDate:'Filter by date',manualSort:'Manual order',dragHint:'Drag the handle or use the arrows to reorder',dragH:'Drag to reorder',moveUp:'Move up',moveDown:'Move down',pWeek:'Week',pMonth:'Month',mTotal:'Month total',vsPrev:'vs last month',mActive:'Study days',mGoalDays:'Goal days',mDetails:'Month details',mBest:'Best day',mStreak:'Longest streak',mAvgStudy:'Avg per study day',mSess:'Sessions',mGoalLine:'Goal',mHit:'Goal reached',mHint:'Tap or drag across the bars to see each day',mPrev:'Previous month',mNext:'Next month',vList:'List',vWeek:'Week',wkPrev:'Previous week',wkNext:'Next week',wkAdd:'Add a task for this day',wkEmpty:'No tasks',wkStudy:'Study',wkTasks:'Tasks',themeT:'Theme',thAuto:'Auto',thLight:'Light',thDark:'Dark',thMaroon:'Maroon',thMono:'Black & White',thOlive:'Olive',thSand:'Beige & Orange',thNavy:'Navy & Cream',thPine:'Pine & Beige',thWine:'Burgundy & Gold',thArctic:'Arctic',thOcean:'Ocean',thLava:'Lava',thRuby:'Ruby',thCustom:'Custom',palT:'Color palette',prevT:'Color preview',exportT:'Export to Excel / CSV',xlsBtn:'Excel (.xls) all sheets',csvLog:'CSV study log',csvTasks:'CSV tasks',shTasks:'Tasks',shSubj:'Subjects',shLog:'Study log',cTitle:'Task',cSubj:'Subject',cDue:'Due',cPri:'Priority',cStatus:'Status',cName:'Name',cTarget:'Weekly target (h)',cWeekMin:'Minutes this week',cTotMin:'Total minutes',cDate:'Date',cMin:'Minutes',exOk:'File ready'}
+ weekOf:'this week',of:'of',close:'Close',totalWeek:'Week total',pct:'of tasks',login:'Log in',register:'Sign up',email:'Email',password:'Password',authSub:'Log in or create an account so your data syncs across your devices.',logout:'Log out',errEmail:'Enter a valid email',errPw:'Password must be at least 6 characters',errBad:'Wrong email or password',errExists:'This email is already registered, log in',authNote:'Your account and data are stored on this device.',planTitle:'Countdown',planSet:'Start countdown',planDays:'How many days until the exam?',planHint:'The counter drops one day every midnight. Optional, cancel any time.',planDay:'Day',dayW:'days',planLeft:'left',planDone:'It’s time, good luck!',daysLeft:'days left',lastDay:'1 day left',planPassed:'elapsed',planName:'Exam name (optional)',planNamePh:'e.g. Final exam',planEdit:'Edit',planClear:'Cancel plan',planSave:'Save',planEmpty:'Have an exam coming up? Turn on the countdown, it drops a day every night. Optional.',partsTitle:'Lecture details (optional)',addPart:'Add chapter',partName:'Chapter name',partHours:'Total lecture time (hours)',partLec:'Number of lectures',partDef:'Chapter',lecW:'lectures',splitTitle:'Daily study split',splitNeed:'Set the available days with the countdown so lecture time can be divided across them.',splitToday:'Today’s share',remaining:'Remaining',allDone:'Subject complete',editSubj:'Details',splitHint:'Tap ✓ after finishing today’s share to reduce what’s left.',saveBtn:'Save',daysAvail:'days available',profile:'Settings & profile',yourName:'Name',namePh:'Enter your name',changePhoto:'Change photo',addPhoto:'Add photo',delPhoto:'Remove photo',accountL:'Account',navSet:'Settings',addWhat:'What do you want to add?',regStudy:'Regular study',regHint:'A subject with a weekly target, color and optional lecture details',focusRev:'Focused review',revHint:'One chapter: review time is divided across the available days to give your daily share',chName:'Chapter name',chPh:'e.g. Chapter 1',rvHours:'Total review time for the chapter (hours)',rvDays:'Days available for the chapter',rvPrev:'Daily share',editRev:'Edit review',delRv:'Delete review',late:'Overdue',addDef:'Add 6th-grade subjects',editTask:'Edit task',backupT:'Backup',expBtn:'Export my data',impBtn:'Import backup',backupHint:'Keep the file somewhere safe. You can restore your data from it any time or on another device.',impConfirm:'Your current data will be replaced by the backup. Sure?',impOk:'Backup imported',impBad:'Invalid file',remindT:'Daily reminder',remindOn:'Remind me of today’s share',remindHint:'You get the notification even with the page in the background. For best results, install the app to your home screen.',remindMsg:'Time to study',focusDone:'Focus session finished, take a break 🎉',brkDone:'Break is over ⏰ start the timer and get back to studying 📚',remindShare:'Today’s share',pwT:'Change password',pwCur:'Current password',pwNew:'New password',pwSave:'Change',pwDone:'Password changed',errBad2:'Current password is wrong',partsDone:'chapters done',searchPh:'Search tasks',clearQ:'Clear search',allSubj:'Subject',allPri:'Priority',anyDate:'Date',clearF:'Clear filters',noMatch:'No matching tasks',fSubj:'Filter by subject',fPri:'Filter by priority',fDate:'Filter by date',manualSort:'Manual order',dragHint:'Drag the handle or use the arrows to reorder',dragH:'Drag to reorder',moveUp:'Move up',moveDown:'Move down',pWeek:'Week',pMonth:'Month',mTotal:'Month total',vsPrev:'vs last month',mActive:'Study days',mGoalDays:'Goal days',mDetails:'Month details',mBest:'Best day',mStreak:'Longest streak',mAvgStudy:'Avg per study day',mSess:'Sessions',mGoalLine:'Goal',mHit:'Goal reached',mHint:'Tap or drag across the bars to see each day',mPrev:'Previous month',mNext:'Next month',vList:'List',vWeek:'Week',wkPrev:'Previous week',wkNext:'Next week',wkAdd:'Add a task for this day',wkEmpty:'No tasks',wkStudy:'Study',wkTasks:'Tasks',themeT:'Theme',thAuto:'Auto',thLight:'Light',thDark:'Dark',thMaroon:'Maroon',thMono:'Black & White',thOlive:'Olive',thSand:'Beige & Orange',thNavy:'Navy & Cream',thPine:'Pine & Beige',thWine:'Burgundy & Gold',thArctic:'Arctic',thOcean:'Ocean',thLava:'Lava',thRuby:'Ruby',thCustom:'Custom',palT:'Color palette',prevT:'Color preview',exportT:'Export to Excel / CSV',xlsBtn:'Excel (.xls) all sheets',csvLog:'CSV study log',csvTasks:'CSV tasks',shTasks:'Tasks',shSubj:'Subjects',shLog:'Study log',cTitle:'Task',cSubj:'Subject',cDue:'Due',cPri:'Priority',cStatus:'Status',cName:'Name',cTarget:'Weekly target (h)',cWeekMin:'Minutes this week',cTotMin:'Total minutes',cDate:'Date',cMin:'Minutes',exOk:'File ready'}
 };
 var P={
  chat:'<path d="M21 12a8 8 0 01-11.6 7.1L3 21l1.9-5.5A8 8 0 1121 12z"/>',
@@ -1546,6 +1584,7 @@ function sheetHtml(k){
     '<div class="sect"><h3>'+t('backupT')+'</h3><div class="prow2"><button type="button" class="btn ghost" data-a="export" style="height:44px;font-size:calc(14px*var(--fs,1));padding-inline:18px">'+t('expBtn')+'</button><label class="btn ghost" for="impFile">'+t('impBtn')+'</label><input type="file" id="impFile" accept="application/json,.json"></div><div class="small muted">'+t('backupHint')+'</div></div>'+
    
    '<details class="opt"><summary>'+t('pwT')+'</summary><form id="fPw" style="display:flex;flex-direction:column;gap:12px"><label class="f">'+t('pwCur')+'<input type="password" id="pwCur" required autocomplete="current-password"></label><label class="f">'+t('pwNew')+'<input type="password" id="pwNew" required minlength="6" autocomplete="new-password"></label><div class="small" id="pwMsg" style="min-height:20px;font-weight:700"></div><button class="btn" type="submit">'+t('pwSave')+'</button></form></details>'+
+   '<div class="sect"><h3>'+pkL('تواصل مع المطور','Contact the developer')+'</h3><button type="button" class="btn ghost prbtn" data-a="contactdev">'+ic('chat',20)+'<span>'+pkL('إبلاغ عن مشكلة أو اقتراح','Report a problem or suggestion')+'</span></button><div class="small muted">'+pkL('يفتح محادثة مع المطور (@okkj0) على تيليجرام','Opens a chat with the developer (@okkj0) on Telegram')+'</div></div>'+
    '<div class="sect"><button class="btn ghost" type="button" data-a="logout">'+t('logout')+'</button></div>';
   if(k==='task'){var et=UI.editTaskId?S.tasks.filter(function(x){return x.id===UI.editTaskId})[0]:null;
    return '<h2>'+t(et?'editTask':'addTask')+'</h2><form id="fTask"><label class="f">'+t('taskTitle')+'<input type="text" id="tTitle" required maxlength="120" value="'+esc(et?et.title:'')+'" placeholder="'+esc(t('taskPh'))+'" autocomplete="off"></label>'+
@@ -1577,7 +1616,7 @@ function rvPrevTxt(h,d){h=parseFloat(h);d=parseInt(d,10);return t('rvPrev')+': '
 function openSheet(k){
   if(k==='profile'){UI.pPhoto=(S.profile&&S.profile.photo)||'';if(!S.fid){var fq0=frSync(true);if(fq0&&fq0.then)fq0.then(function(){var e=document.getElementById('fidVal');if(e&&S.fid)e.textContent=fidFmt(S.fid)},function(){})}}
   UI.sheet=k;UI.dirty=false;document.getElementById('sheetBody').innerHTML=sheetHtml(k);enhancePickers();
-  var sh=document.getElementById('sheet');sh.classList.add('open');document.getElementById('scrim').classList.add('open');
+  var sh=document.getElementById('sheet');sh.classList.toggle('full',k==='chat');sh.classList.add('open');document.getElementById('scrim').classList.add('open');
   var hh=document.getElementById('sheetBody').querySelector('h2,h3');if(hh){hh.id='sheetTitle';sh.setAttribute('aria-labelledby','sheetTitle')}
   mmOpen(sh,{esc:closeSheetSafe})}
 
@@ -1842,6 +1881,9 @@ function tick(){
     try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}
     notify(t('app'),TM.mode==='focus'?stkDoneMsg((subj(TM.subj)||{}).name):t('brkDone'),'session-end');
     setMode(TM.mode==='focus'?'break':'focus');render();return}
+  /* the clock text only changes once a second: repaint only when something visible changed (was every 250ms) */
+  var tk=TM.left+'|'+S.view+'|'+TM.running+'|'+TM.mode+'|'+TM.total;
+  if(tk===window._tk)return;window._tk=tk;
   if(S.view==='timer')paintTimer();else paintMini()}
 function timerToggle(){
   if(TM.running){var ms=Math.max(0,TM.endAt-Date.now());TM.leftMs=ms;TM.left=Math.ceil(ms/1000);TM.running=false}
@@ -1962,11 +2004,20 @@ function sbPull(email){
 function goVerify(email,pw){
   AU.email=email;AU.pw=pw;AU.mode='verify';AU.ok=true;AU.err=pkL('أرسلنا رمز التحقق إلى بريدك','We sent a verification code to your email');
   authRender();var c=document.getElementById('aCode');if(c&&matchMedia('(hover:hover)').matches)c.focus()}
-function resendCode(email,quiet){
-  email=email||AU.email;
+function authErrMsg(e){
+  var m=String(e&&(e.msg||e.error_description||e.message)||''),c=String(e&&(e.error_code||'')||'');
+  if(c==='email_address_not_authorized'||/not authorized/i.test(m))return pkL('السيرفر لا يرسل إيميلات لهذا البريد بعد (يحتاج إعداد SMTP في Supabase)','The server can’t email this address yet (custom SMTP is needed in Supabase)');
+  if((e&&e.code===429)||c==='over_email_send_rate_limit'||/rate limit|too many|security purposes|only request this after/i.test(m))return pkL('طلبات كثيرة، انتظر دقيقة وحاول مرة ثانية','Too many requests, wait a minute and try again');
+  if(/error sending|smtp|unable to send/i.test(m))return pkL('تعذّر إرسال الإيميل من السيرفر (تحقق من إعداد SMTP في Supabase)','The server couldn’t send the email (check the SMTP setup in Supabase)');
+  return ''}
+function resendCode(email,quiet,type){
+  email=email||AU.email;type=type||'signup';
   function say(m,ok){AU.err=m;AU.ok=!!ok;var r=document.getElementById('aErr');if(r){r.textContent=m;r.classList.toggle('ok',!!ok)}}
-  return sbReq('/auth/v1/resend',{m:'POST',b:{type:'signup',email:email}}).then(function(){if(!quiet)say(pkL('أعدنا إرسال الرمز، تحقق من بريدك','Code sent again, check your email'),true)})
-    .catch(function(){if(!quiet)say(pkL('تعذّر الإرسال، حاول بعد قليل','Could not send, try again shortly'))})}
+  var w=Math.ceil(((AU.cd||0)-Date.now())/1000);
+  if(!quiet&&w>0){say(pkL('انتظر '+w+' ثانية قبل إعادة الإرسال','Wait '+w+'s before resending'));return Promise.resolve()}
+  var rq=type==='recovery'?sbReq('/auth/v1/recover',{m:'POST',b:{email:email}}):sbReq('/auth/v1/resend',{m:'POST',b:{type:'signup',email:email}});
+  return rq.then(function(){AU.cd=Date.now()+60000;if(!quiet)say(pkL('أعدنا إرسال الرمز، تحقق من بريدك (وملف السبام)','Code sent again, check your email (and spam)'),true)})
+    .catch(function(e){if(!quiet)say(authErrMsg(e)||pkL('تعذّر الإرسال، حاول بعد قليل','Could not send, try again shortly'))})}
 function sbAuth(email,pw){
   var reg=AU.mode==='register';
   function say(m){AU.err=m;var r=document.getElementById('aErr');if(r)r.textContent=m}
@@ -1975,8 +2026,12 @@ function sbAuth(email,pw){
     sbStore(r);var users=getUsers(),salt=newSalt();
     return hashPw(pw,salt).then(function(h){users[email]={salt:salt,hash:h};putUsers(users);return sbPull(email)}).then(function(){enterApp(email);sbPushSoon()})}
   function msg(e){return (e&&(e.msg||e.error_description||e.message))||''}
-  sbReq(reg?'/auth/v1/signup':'/auth/v1/token?grant_type=password',{m:'POST',b:{email:email,password:pw}}).then(done).catch(function(e){
+  sbReq(reg?'/auth/v1/signup':'/auth/v1/token?grant_type=password',{m:'POST',b:{email:email,password:pw}}).then(function(r){
+    if(reg&&r&&Array.isArray(r.identities)&&!r.identities.length)return say(t('errExists'));
+    if(reg&&r&&!r.access_token)AU.cd=Date.now()+60000;
+    return done(r)}).catch(function(e){
     if(e instanceof TypeError){AU.offline=true;var f=document.getElementById('fAuth');if(f&&f.requestSubmit)f.requestSubmit();return}
+    if(reg){var am=authErrMsg(e);if(am)return say(am)}
     if(reg&&/already/i.test(msg(e)))return say(t('errExists'));
     if(!reg&&/not confirmed/i.test(msg(e))){resendCode(email,true);return goVerify(email,pw)}
     var lu=getUsers()[email];
@@ -1984,6 +2039,12 @@ function sbAuth(email,pw){
       return hashPw(pw,lu.salt).then(function(h){
         if(h!==lu.hash)return say(t('errBad'));
         return sbReq('/auth/v1/signup',{m:'POST',b:{email:email,password:pw}}).then(done).catch(function(){say(t('errBad'))})})}
+    if(!reg&&lu){   /* Android build: local login when the server is unreachable or rejects the account */
+      return hashPw(pw,lu.salt).then(function(h){
+        if(h===lu.hash)return enterApp(email);
+        say(t('errBad'));
+      });
+    }
     say(t('errBad')+(msg(e)?' ('+msg(e)+')':''))})}
 (function(){var h=location.hash||'';if(h.indexOf('type=recovery')<0)return;
   var p=new URLSearchParams(h.slice(1));SB.rtok=p.get('access_token')||'';
@@ -2006,7 +2067,7 @@ var LOGO='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAQ
 var AUT=0;
 function authRender(){
   var de=document.documentElement;de.lang=S.lang;de.dir=S.lang==='ar'?'rtl':'ltr';
-  var reg=AU.mode==='register',fgt=AU.mode==='forgot'||AU.mode==='recover',wel=AU.mode==='welcome',ver=AU.mode==='verify',rec=AU.mode==='recover',o=AU.open?' open':'',ev=esc(AU.email||'');
+  var reg=AU.mode==='register',fgt=AU.mode==='forgot'||AU.mode==='recover',wel=AU.mode==='welcome',ver=AU.mode==='verify',rst=AU.mode==='reset',rec=AU.mode==='recover',o=AU.open?' open':'',ev=esc(AU.email||'');
   document.getElementById('auth').innerHTML=
    '<button class="rb aulang" type="button" data-au="lang" aria-label="Language">'+(S.lang==='ar'?'EN':'ع')+'</button>'+
    '<div class="intro"><img class="logo" decoding="async" src="'+LOGO+'" alt=""><h1 class="brand2">'+esc(t('app'))+'</h1><p class="tag">'+pkL('مذاكرتك مرتّبة ومتزامنة','Your study, organized and in sync')+'</p>'+
@@ -2015,15 +2076,24 @@ function authRender(){
    '</div>'+
    '<div class="apscrim'+o+'" data-au="shut"></div>'+
    '<div class="apop'+o+'" role="dialog" aria-modal="true" aria-labelledby="apT"><div class="grab"></div>'+
-   '<div class="aph"><h2 id="apT">'+(wel?pkL('أهلاً بك','Welcome'):ver?pkL('تأكيد البريد','Verify email'):fgt?pkL(rec?'كلمة سر جديدة':'نسيت كلمة السر',rec?'New password':'Forgot password'):t(reg?'register':'login'))+'</h2>'+(wel?'':'<button class="rb" type="button" data-au="shut" aria-label="'+esc(pkL('إغلاق','Close'))+'">'+ic(S.lang==='ar'?'chevR':'chevL',18)+'</button>')+'</div>'+
-   '<p class="muted" style="margin:-8px 0 0">'+(ver?pkL('اكتب الرمز المرسل إلى: ','Enter the code sent to: ')+'<bdi dir="ltr">'+esc(AU.email||'')+'</bdi>':fgt?(rec?pkL('اكتب كلمة السر الجديدة.','Enter your new password.'):sbOn()?pkL('اكتب بريدك وبنرسل لك رابط لتعيين كلمة سر جديدة.','Enter your email and we will send you a reset link.'):pkL('اكتب بريدك وكلمة سر جديدة. حسابك محفوظ على هذا الجهاز وبياناتك ستبقى كما هي.','Enter your email and a new password. Your account is stored on this device and your data stays as it is.')):t('authSub'))+'</p>'+
-   (fgt||wel||ver?'':'<div class="tabs"><button type="button" data-au="login" aria-pressed="'+!reg+'">'+t('login')+'</button><button type="button" data-au="register" aria-pressed="'+reg+'">'+t('register')+'</button></div>')+
+   '<div class="aph"><h2 id="apT">'+(wel?pkL('أهلاً بك','Welcome'):ver?pkL('تأكيد البريد','Verify email'):rst?pkL('كلمة سر جديدة','New password'):fgt?pkL(rec?'كلمة سر جديدة':'نسيت كلمة السر',rec?'New password':'Forgot password'):t(reg?'register':'login'))+'</h2>'+(wel?'':'<button class="rb" type="button" data-au="shut" aria-label="'+esc(pkL('إغلاق','Close'))+'">'+ic(S.lang==='ar'?'chevR':'chevL',18)+'</button>')+'</div>'+
+   '<p class="muted" style="margin:-8px 0 0">'+((ver||rst)?pkL('اكتب الرمز المرسل إلى: ','Enter the code sent to: ')+'<bdi dir="ltr">'+esc(AU.email||'')+'</bdi>':fgt?(rec?pkL('اكتب كلمة السر الجديدة.','Enter your new password.'):sbOn()?pkL('اكتب بريدك وبنرسل لك رمز لتعيين كلمة سر جديدة.','Enter your email and we will send you a code to set a new password.'):pkL('اكتب بريدك وكلمة سر جديدة. حسابك محفوظ على هذا الجهاز وبياناتك ستبقى كما هي.','Enter your email and a new password. Your account is stored on this device and your data stays as it is.')):t('authSub'))+'</p>'+
+   (fgt||wel||ver||rst?'':'<div class="tabs"><button type="button" data-au="login" aria-pressed="'+!reg+'">'+t('login')+'</button><button type="button" data-au="register" aria-pressed="'+reg+'">'+t('register')+'</button></div>')+
    (wel?'<div class="wbtns"><button class="btn" type="button" data-au="login">'+t('login')+'</button><button class="btn out" type="button" data-au="register">'+t('register')+'</button></div>':ver?
    '<form id="fVerify" novalidate><label class="f">'+pkL('رمز التحقق','Verification code')+'<input type="text" id="aCode" required inputmode="numeric" autocomplete="one-time-code" maxlength="8" pattern="[0-9]*" placeholder="••••••" style="direction:ltr;text-align:center;letter-spacing:.45em;font-size:24px;font-weight:700"></label>'+
    '<div class="err'+(AU.ok?' ok':'')+'" id="aErr" role="alert">'+esc(AU.err)+'</div>'+
    '<button class="btn" type="submit">'+pkL('تأكيد وإنشاء الحساب','Verify and continue')+'</button>'+
+   '<button class="btn ghost" type="button" data-au="skipcode" style="margin-top:6px">'+pkL('المتابعة والدخول بدون رمز','Continue without code')+'</button>'+
    '<button class="link fg" type="button" data-au="resend" style="align-self:center">'+pkL('إعادة إرسال الرمز','Resend code')+'</button>'+
    '<button class="link fg" type="button" data-au="register" style="align-self:center">'+pkL('تغيير البريد','Change email')+'</button></form>'
+    :rst?
+    '<form id="fReset" novalidate><label class="f">'+pkL('رمز التحقق','Verification code')+'<input type="text" id="aRCode" required inputmode="numeric" autocomplete="one-time-code" maxlength="8" pattern="[0-9]*" placeholder="••••••" style="direction:ltr;text-align:center;letter-spacing:.45em;font-size:24px;font-weight:700"></label>'+
+    '<label class="f">'+pkL('كلمة السر الجديدة','New password')+'<input type="password" id="aPw" required minlength="6" autocomplete="new-password"></label>'+
+    '<label class="f">'+pkL('تأكيد كلمة السر','Confirm password')+'<input type="password" id="aPw2" required minlength="6" autocomplete="new-password"></label>'+
+    '<div class="err'+(AU.ok?' ok':'')+'" id="aErr" role="alert">'+esc(AU.err)+'</div>'+
+    '<button class="btn" type="submit">'+pkL('تعيين كلمة السر','Reset password')+'</button>'+
+    '<button class="link fg" type="button" data-au="resendreset" style="align-self:center">'+pkL('إعادة إرسال الرمز','Resend code')+'</button>'+
+    '<button class="link fg" type="button" data-au="login" style="align-self:center">'+pkL('الرجوع لتسجيل الدخول','Back to log in')+'</button></form>'
    :fgt?
    '<form id="'+(rec?'fRecover':'fForgot')+'" novalidate>'+(rec?'':'<label class="f">'+t('email')+'<input type="email" id="aEmail" required autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false" value="'+ev+'"></label>')+
    (sbOn()&&!rec?'':'<label class="f">'+pkL('كلمة السر الجديدة','New password')+'<input type="password" id="aPw" required minlength="6" autocomplete="new-password"></label>'+
@@ -2078,8 +2148,9 @@ function compactLogs(){
     keep.push(l)});
   if(keep.length!==S.logs.length)S.logs=keep}
 function logout(){
+  try{var FB=window.AndroidBridge;if(FB&&FB.getFcmToken){var ft=FB.getFcmToken();if(ft)frRpc('delete_fcm',{p_token:ft}).catch(function(){})}localStorage.removeItem('mz-fcm')}catch(e){}
   flushSave();if(SB){clearTimeout(SB.t);sbPush()}USER='';clearSession();if(SB){SB.tok='';try{localStorage.removeItem('mudhakirati-sb')}catch(e){}}
-  TM.running=false;AU.mode='login';AU.err='';
+  TM.running=false;AU.mode='login';AU.err='';FR.rq=null;FR.rqSeen=null;FR.rqSig='';
   var lang=S.lang;S=seed();S.lang=lang;showAuth()}
 document.addEventListener('click',function(e){
   var el=e.target.closest('[data-au]');if(!el)return;var a=el.getAttribute('data-au');
@@ -2087,15 +2158,33 @@ document.addEventListener('click',function(e){
   else if(a==='login'||a==='register'||a==='forgot'||a==='welcome'){var ee=document.getElementById('aEmail');if(ee)AU.email=ee.value;AU.mode=a;AU.err='';AU.ok=false;authRender()}
   else if(a==='go-login'||a==='go-register')openAuth(a.slice(3));
   else if(a==='resend')resendCode();
+  else if(a==='resendreset')resendCode(AU.email,false,'recovery');
+  else if(a==='skipcode'){
+    var em=AU.email||'student@mudhakirati.app',pw=AU.pw||'123456',users=getUsers(),salt=newSalt();
+    hashPw(pw,salt).then(function(h){users[em]={salt:salt,hash:h};putUsers(users);AU.pw='';enterApp(em);showToast(pkL('تم إنشاء الحساب والدخول بنجاح','Account created and logged in'))});
+  }
   else if(a==='shut')shutAuth();
   else if(a==='fs-inc'||a==='fs-dec'){var ni=FS.i+(a==='fs-inc'?1:-1);if(ni>=0&&ni<FS.L.length){FS.i=ni;fsApply()}}});
 document.addEventListener('input',function(e){if(e.target.id==='aEmail')AU.email=e.target.value});
 document.addEventListener('submit',function(e){
-  var id=e.target.id;if(id!=='fForgot'&&id!=='fRecover')return;e.preventDefault();
+  var id=e.target.id;if(id!=='fForgot'&&id!=='fRecover'&&id!=='fReset')return;e.preventDefault();
   function V(x){var n=document.getElementById(x);return n?n.value:''}
   var email=V('aEmail').trim().toLowerCase(),pw=V('aPw'),pw2=V('aPw2');
   function say(m,ok){AU.err=m;AU.ok=!!ok;var r=document.getElementById('aErr');if(r){r.textContent=m;r.classList.toggle('ok',!!ok)}}
   var mism=pkL('كلمتا السر غير متطابقتين','Passwords do not match'),okm=pkL('تم تغيير كلمة السر، سجّل الدخول الآن','Password changed, log in now');
+  if(id==='fReset'){
+    var rcode=V('aRCode').replace(/\s+/g,'');
+    if(!/^\d{6,8}$/.test(rcode))return say(pkL('اكتب الرمز المكوّن من 6 أرقام','Enter the 6-digit code'));
+    if(pw.length<6)return say(t('errPw'));if(pw!==pw2)return say(mism);
+    var rem=AU.email;
+    return sbReq('/auth/v1/verify',{m:'POST',b:{type:'recovery',email:rem,token:rcode}}).then(function(r){
+      if(!r||!r.access_token)throw 0;
+      return sbReq('/auth/v1/user',{m:'PUT',tok:r.access_token,b:{password:pw}})
+    }).then(function(){
+      var users=getUsers(),salt=newSalt();
+      return hashPw(pw,salt).then(function(h){if(rem){users[rem]={salt:salt,hash:h};putUsers(users)}AU.cd=0;AU.email=rem;AU.mode='login';AU.ok=true;AU.err=okm;authRender()})
+    }).catch(function(e){var m=String(e&&(e.msg||e.error_description||e.message)||'');
+      say(authErrMsg(e)||(/different|same/i.test(m)?pkL('اختر كلمة سر مختلفة عن القديمة','Choose a password different from the old one'):/weak|at least|short/i.test(m)?t('errPw'):pkL('الرمز غير صحيح أو منتهي، اطلب رمزًا جديدًا','Wrong or expired code, request a new one')))})}
   if(id==='fRecover'){
     if(pw.length<6)return say(t('errPw'));if(pw!==pw2)return say(mism);
     return sbReq('/auth/v1/user',{m:'PUT',tok:SB.rtok,b:{password:pw}}).then(function(u){
@@ -2104,7 +2193,7 @@ document.addEventListener('submit',function(e){
     }).catch(function(){say(pkL('الرابط منتهي، اطلب رابطًا جديدًا','Link expired, request a new one'))})}
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return say(t('errEmail'));
   if(sbOn())return sbReq('/auth/v1/recover?redirect_to='+encodeURIComponent(location.origin+location.pathname),{m:'POST',b:{email:email}}).then(function(){
-    say(pkL('إذا كان البريد مسجّلًا، أرسلنا لك رابط إعادة التعيين','If this email is registered, we sent you a reset link'),true)}).catch(function(e){var m=e&&(e.msg||e.error_description||e.message)||'';say(pkL('تعذّر الإرسال، حاول لاحقًا','Could not send, try again later')+(m?' ('+m+')':''))});
+    AU.email=email;AU.mode='reset';AU.cd=Date.now()+60000;AU.ok=true;AU.err=pkL('إذا كان البريد مسجّلًا، أرسلنا لك رمزًا (أو رابطًا) لإعادة التعيين','If this email is registered, we sent you a code (or link) to reset it');authRender()}).catch(function(e){var m=e&&(e.msg||e.error_description||e.message)||'';say(authErrMsg(e)||(pkL('تعذّر الإرسال، حاول لاحقًا','Could not send, try again later')+(m?' ('+m+')':'')))});
   var users=getUsers();
   if(!users[email])return say(pkL('لا يوجد حساب بهذا البريد على هذا الجهاز','No account with this email on this device'));
   if(pw.length<6)return say(t('errPw'));if(pw!==pw2)return say(mism);
@@ -2155,13 +2244,23 @@ function todayShare(){
   return i?tot:0}
 /* ---------- Service Worker bridge + real notifications (steps 9-10) ---------- */
 var VAPID_PUBLIC='BDwfrJ0MYH0e3XxOyyl2PIc0sVzs1NRzQM3fxla99AJf3BxXhhq41bQSeMqNtPA93qfIq2jaueauckjxtshO_98';   /* ضع مفتاح VAPID العام هنا عند ربط سيرفر Push، وإلا يبقى Push معطلًا */
-function swPost(m){try{if(!navigator.serviceWorker)return;navigator.serviceWorker.ready.then(function(r){if(r.active)r.active.postMessage(m)}).catch(function(){})}catch(e){}}
-function askPerm(cb){try{if(!window.Notification)return;
+/* Android app: forward timer/reminder to native system alarms so they fire in the background */
+function andAlarm(m){try{var B=window.AndroidBridge;if(!B||!B.scheduleTimer)return;
+  if(m.type==='timer'){B.scheduleTimer(m.endAt,m.title||'',m.body||'');if(B.setBreakChain)B.setBreakChain(m.chain||0,m.title||'',m.chainBody||'')}
+  else if(m.type==='timer-cancel')B.cancelTimer();
+  else if(m.type==='remind-cfg'){if(m.on){var p=String(m.time||'18:00').split(':');B.scheduleDaily(+p[0]||0,+p[1]||0,m.title||'',m.body||'')}else B.cancelDaily()}}catch(e){}}
+function swPost(m){try{andAlarm(m);if(!navigator.serviceWorker)return;navigator.serviceWorker.ready.then(function(r){if(r.active)r.active.postMessage(m)}).catch(function(){})}catch(e){}}
+function askPerm(cb){try{
+  if(window.AndroidBridge){cb&&cb();return}
+  if(!window.Notification)return;
   if(Notification.permission==='granted'){cb&&cb();return}
   if(Notification.permission!=='default')return;
   var p=Notification.requestPermission();
   Promise.resolve(p).then(function(r){if(r==='granted'&&cb)cb()})}catch(e){}}
 function notify(title,body,tag){try{
+  if(window.AndroidBridge&&window.AndroidBridge.showNotification){
+    window.AndroidBridge.showNotification(title,body,tag||'mz');
+  }
   if(!window.Notification||Notification.permission!=='granted')return;
   var o={body:body,tag:tag||'mz',icon:'icons/apple-touch-icon-180.png',lang:S.lang,dir:S.lang==='ar'?'rtl':'ltr',vibrate:[200,100,200],renotify:tag==='session-end',data:{url:'./'}};
   var fb=function(){try{new Notification(title,o)}catch(x){}};
@@ -2181,11 +2280,11 @@ function applyTimer(r){
   else{TM.running=false;TM.leftMs=r.l>0?r.l:null;TM.left=r.l>0?Math.min(TM.total,Math.ceil(r.l/1000)):TM.total}}
 function swTimer(){
   saveTimer();
-  if(TM.running)swPost({type:'timer',endAt:TM.endAt,title:t('app'),body:TM.mode==='focus'?t('focusDone'):t('brkDone')});
+  if(TM.running)swPost({type:'timer',endAt:TM.endAt,title:t('app'),body:TM.mode==='focus'?t('focusDone'):t('brkDone'),chain:TM.mode==='focus'?Math.round((+S.settings.brk||0)*60000):0,chainBody:t('brkDone')});
   else swPost({type:'timer-cancel'})}
 function regDaily(){
   pushSync();
-  var on=!!(S.remind&&S.remind.on&&window.Notification&&Notification.permission==='granted');
+  var on=!!(S.remind&&S.remind.on&&(window.AndroidBridge||(window.Notification&&Notification.permission==='granted')));
   swPost({type:'remind-cfg',on:on,time:(S.remind&&S.remind.time)||'18:00',title:t('app'),body:remindBody()});
   try{if(!navigator.serviceWorker)return;navigator.serviceWorker.ready.then(function(r){
     if(!r.periodicSync)return;
@@ -2435,6 +2534,7 @@ document.addEventListener('click',function(e){
     if(UI.sheet==='profile'){var sb2=document.getElementById('sheetBody');sb2.innerHTML=sheetHtml('profile');enhancePickers();var h2=sb2.querySelector('h2,h3');if(h2)h2.id='sheetTitle'}}
   else if(a==='lang'){S.lang=S.lang==='ar'?'en':'ar';try{localStorage.setItem(LANG_K,S.lang)}catch(x){}render(true)}
   else if(a==='logout'){closeSheet();logout()}
+  else if(a==='contactdev'){window.open('https://t.me/okkj0','_blank')}   /* developer contact: change the link here */
   else if(a==='export'){doExport()}
   else if(a==='xls'){exXls()}
   else if(a==='csvtasks'){exCsv(exTables().tasks,'tasks')}
@@ -2586,7 +2686,7 @@ document.addEventListener('submit',function(e){
     var d=parseInt(document.getElementById('pDays').value,10);if(!(d>0))return;d=Math.min(365,d);
     S.plan={days:d,start:today(),name:document.getElementById('pName').value.trim()};closeSheet();render()}
   else if(id==='fProf'){
-    S.profile={name:document.getElementById('pNameIn').value.trim(),photo:UI.pPhoto||''};closeSheet();render()}
+    S.profile={name:document.getElementById('pNameIn').value.trim(),photo:UI.pPhoto||''};closeSheet();render();frPhotoSoon()}
   else if(id==='fRev'){
     var rn=document.getElementById('rvName').value.trim(),rh=parseFloat(document.getElementById('rvHours').value),rd=parseInt(document.getElementById('rvDays').value,10);
     if(!rn||!(rh>0)||!(rd>0))return;rd=Math.min(365,rd);S.reviews=S.reviews||[];
@@ -2837,7 +2937,7 @@ function playIntro(quick){
   setTimeout(function(){el.classList.add('off');setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},700)},quick?1100:3200)}
 /* ======================= مساحتي =======================
    1) الجدول الأسبوعي  2) الستريك مع الأصدقاء (Supabase)  3) بطاقات الملاحظات المهمة */
-var FR={nk:'lesson',nd:30,nsel:'',now:'',list:null,err:'',busy:false,sig:'',add:'',msg:'',ok:false,t:0};
+var FR={nk:'lesson',nd:30,nsel:'',now:'',list:null,err:'',busy:false,sig:'',add:'',msg:'',ok:false,t:0,rq:null,rqSeen:null,rqSig:'',pno:0};
 var DAYS_AR=['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'],DAYS_EN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 var DAYS_AR_L=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'],DAYS_EN_L=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 function fidFmt(c){return c?c.slice(0,4)+'-'+c.slice(4):''}
@@ -2879,21 +2979,79 @@ function myDays(){var m={};S.logs.forEach(function(l){if(l.min>0)m[l.date]=1});r
 function runLen(has){var n=0,i=has(today())?0:1;while(i<400&&has(addDays(-i))){n++;i++}return n}
 function setOf(a){var m={};(a||[]).forEach(function(d){m[d]=1});return m}
 function frIsMissing(e){var m=String(e&&(e.message||e.msg||'')||'');return !!(e&&(e.code==='PGRST202'||e.code==='42883'||/could not find the function|does not exist/i.test(m)))}
-function frErr(e){FR.err=frIsMissing(e)?'setup':'net'}
+function frErr(e){FR.err=frIsMissing(e)?'setup':(e&&e.offline?'login':'net')}
 function frRpc(fn,body){return sbTok().then(function(tok){if(!tok)throw {offline:1};return sbReq('/rest/v1/rpc/'+fn,{m:'POST',tok:tok,b:body})})}
+/* FCM push (Android app only): register this device's token so friends' messages arrive even when the app is closed */
+function fcmSync(){
+  try{var B=window.AndroidBridge;if(!B||!B.getFcmToken||!SB||!SB.uid||!USER)return;
+    var tk=B.getFcmToken();if(!tk)return;
+    var key=SB.uid+'|'+tk;if(localStorage.getItem('mz-fcm')===key)return;
+    frRpc('save_fcm',{p_token:tk}).then(function(){try{localStorage.setItem('mz-fcm',key)}catch(e){}}).catch(function(){})}catch(e){}}
+/* Android: silent "new day" notification every midnight */
+function andNewDay(){try{var B=window.AndroidBridge;if(B&&B.scheduleNewDay)B.scheduleNewDay(t('app'),pkL('يوم جديد 🌅 ابدأ يومك بمذاكرة','New day 🌅 start it with some studying'))}catch(e){}}
+setTimeout(andNewDay,2500);
+setTimeout(fcmSync,3000);setInterval(fcmSync,20000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden)fcmSync()});
 function frSync(force){
   if(!sbOn()||!USER)return Promise.resolve();
-  var d=myDays(),nm=profName()||String(USER).split('@')[0],sig=nm+'|'+d.join(',');
+  var d=myDays(),nm=profName(),sig=nm+'|'+d.join(',');
   if(!force&&sig===FR.sig&&S.fid)return Promise.resolve();
   return frRpc('sync_profile',{p_name:nm,p_days:d}).then(function(c){
     FR.sig=sig;if(FR.err==='setup')FR.err='';
     if(typeof c==='string'&&/^[A-Z0-9]{8}$/.test(c)&&S.fid!==c){S.fid=c;save()}
-  },function(e){frErr(e);throw e})}
+  },function(e){frErr(e);throw e}).then(function(){frPhoto()})}
 function frLoad(){
   if(!sbOn()||!USER)return;
   FR.busy=true;paintFr();
-  frSync(true).then(function(){return frRpc('get_friends',{})}).then(function(r){FR.list=Array.isArray(r)?r:[];FR.err=''})
+  frSync(true).then(function(){return frRpc('get_friends',{})}).then(function(r){FR.list=Array.isArray(r)?r:[];FR.err=''}).then(frReqLoad)
    .catch(function(e){if(!FR.err)frErr(e)}).then(function(){FR.busy=false;paintFr();var e=document.getElementById('fidVal');if(e&&S.fid)e.textContent=fidFmt(S.fid)})}
+/* ---- friend requests: profile photo thumbnail, load, alerts, cards ---- */
+/* ---- friend display names: local nickname > his own profile name > ID (the e-mail is never shown) ---- */
+function nkAll(){try{return JSON.parse(stkLs('nick')||'{}')||{}}catch(e){return {}}}
+function nkGet(c){return nkAll()[c]||''}
+function nkSet(c,v){var m=nkAll();if(v)m[c]=v;else delete m[c];stkLs('nick',JSON.stringify(m))}
+function frNm(f){return nkGet(f.code)||f.name||(pkL('صديق ','Friend ')+fidFmt(f.code))}
+function frThumb(src){return new Promise(function(res){
+  if(!src)return res('');
+  var im=new Image();
+  im.onload=function(){try{var n=96,c=document.createElement('canvas');c.width=c.height=n;var x=c.getContext('2d'),m=Math.min(im.width,im.height);
+    x.drawImage(im,(im.width-m)/2,(im.height-m)/2,m,m,0,0,n,n);res(c.toDataURL('image/jpeg',.7))}catch(e){res('')}};
+  im.onerror=function(){res('')};im.src=src})}
+function frPhoto(){
+  if(FR.pno||!sbOn()||!USER||!SB.uid)return Promise.resolve();
+  var ph=(S.profile&&S.profile.photo)||'',sig=SB.uid+'|'+ph.length+'|'+ph.slice(-32),k='mz-phs';
+  try{if(localStorage.getItem(k)===sig)return Promise.resolve()}catch(e){}
+  return frThumb(ph).then(function(th){
+    if(ph&&!th)return;
+    return frRpc('set_photo',{p_photo:th}).then(function(){try{localStorage.setItem(k,sig)}catch(e){}})
+  }).catch(function(e){if(frIsMissing(e))FR.pno=1})}
+function frPhotoSoon(){setTimeout(function(){if(sbOn()&&USER&&S.fid)frPhoto()},300)}
+function frReqLoad(){
+  return frRpc('get_requests',{}).then(function(r){
+    if(!r||!Array.isArray(r.incoming))return false;
+    var q={i:r.incoming,o:Array.isArray(r.outgoing)?r.outgoing:[]},sig=JSON.stringify([q.i.map(function(x){return x.code}),q.o.map(function(x){return x.code})]),ch=sig!==FR.rqSig;
+    FR.rq=q;FR.rqSig=sig;frReqAlert();return ch
+  }).catch(function(){return false})}
+function frReqAlert(){
+  var cur=(FR.rq&&FR.rq.i)||[],seen=FR.rqSeen;
+  if(seen){cur.forEach(function(q){if(!seen[q.code]){
+    var msg='👋 '+frNm(q)+pkL(' أرسل لك طلب صداقة',' sent you a friend request');
+    if(document.hidden)notify(t('app'),msg,'rq-'+q.code);else{showToast(msg);try{navigator.vibrate&&navigator.vibrate(120)}catch(e){}}}})}
+  FR.rqSeen={};cur.forEach(function(q){FR.rqSeen[q.code]=1});
+  STK.un.__rq=cur.length;stkDotUpdate()}
+function frReqIn(){
+  var q=FR.rq;if(!q||!q.i.length)return '';
+  var dis=FR.busy?' disabled':'';
+  return '<div class="rqh">'+ic('users',16)+'<span>'+esc(pkL('طلبات الصداقة','Friend requests'))+'</span><b class="num">'+q.i.length+'</b></div>'+
+    q.i.map(function(r){var nm=frNm(r);
+      return '<div class="rqc"><div class="top"><div class="fav lg">'+avInner(r.photo,nm)+'</div><div class="grow"><div class="nm"><span class="t">'+esc(nm)+'</span></div>'+
+        '<div class="small muted">'+esc(pkL('يريد يضيفك كصديق','Wants to add you as a friend'))+'</div></div></div>'+
+        '<div class="rqb"><button type="button" class="btn" data-a="rqok" data-id="'+esc(r.code)+'"'+dis+'>'+esc(pkL('قبول','Accept'))+'</button>'+
+        '<button type="button" class="btn ghost" data-a="rqno" data-id="'+esc(r.code)+'"'+dis+'>'+esc(pkL('رفض','Decline'))+'</button></div></div>'}).join('')}
+function frReqOut(){
+  var q=FR.rq;if(!q||!q.o.length)return '';
+  return '<div class="rqo"><div class="small muted">'+esc(pkL('طلبات أرسلتها (بانتظار الموافقة)','Requests you sent (waiting for approval)'))+'</div>'+
+    q.o.map(function(r){return '<div class="rqor"><span class="t">'+esc(frNm(r))+'</span><button type="button" class="chip" data-a="rqcx" data-id="'+esc(r.code)+'"'+(FR.busy?' disabled':'')+'>'+esc(pkL('إلغاء الطلب','Cancel'))+'</button></div>'}).join('')+'</div>'}
 function nowDur(t){var m=/(\d+)\s*(?:د|min)\s*$/.exec(String(t||''));return m?+m[1]:0}
 function nowAct(t,at){var d=nowDur(t);return !!(t&&at&&Date.now()-at<(d?(d+30)*60000:10800000))}
 function agoTxt(at){var m=Math.max(0,Math.round((Date.now()-at)/60000));
@@ -2930,14 +3088,17 @@ function frInner(){
      '<div class="small muted num" dir="ltr" style="text-align:start">'+(S.fid?fidFmt(S.fid):'…')+'</div></div><div class="fs"><b class="fl num">'+ic('flame',16)+ms+'</b></div></div>';
   h+=nowBox();
   if(FR.err==='setup')h+='<div class="frmsg">'+esc(pkL('ميزة الأصدقاء غير مفعّلة على السيرفر بعد (تحتاج تشغيل ملف SQL مرة واحدة).','Friends isn’t enabled on the server yet (run the SQL file once).'))+'</div>';
+  else if(FR.err==='login')h+='<div class="frmsg">'+esc(pkL('الأصدقاء يحتاج حساب مؤكَّد بالإيميل. سجّل خروج ثم ادخل بحسابك وأدخل رمز التحقق.','Friends needs an email-verified account. Log out, then sign in and enter the verification code.'))+'</div>';
   else if(FR.err==='net')h+='<div class="frmsg">'+esc(pkL('تعذّر الاتصال، تأكد من الإنترنت وحاول مرة ثانية.','Could not connect, check your internet and retry.'))+'</div>';
-  h+='<form id="fFr" class="frform" autocomplete="off"><input id="frIn" maxlength="12" value="'+esc(FR.add)+'" placeholder="'+esc(pkL('ID صديقك','Friend ID'))+'" inputmode="text" autocapitalize="characters" spellcheck="false"><button class="btn" type="submit"'+(FR.busy?' disabled':'')+'>'+pkL('إضافة','Add')+'</button></form>';
+  h+=frReqIn();
+  h+='<form id="fFr" class="frform" autocomplete="off"><input id="frIn" maxlength="12" value="'+esc(FR.add)+'" placeholder="'+esc(pkL('ID صديقك','Friend ID'))+'" inputmode="text" autocapitalize="characters" spellcheck="false"><button class="btn" type="submit"'+(FR.busy?' disabled':'')+'>'+pkL('إرسال طلب','Send request')+'</button></form>';
   h+='<div class="frmsg'+(FR.ok?' ok':'')+'">'+esc(FR.msg)+'</div>';
+  h+=frReqOut();
   var L=(FR.list||[]).map(function(f){var s=setOf(f.days);return {f:f,s:s,st:runLen(function(d){return s[d]}),sh:runLen(function(d){return s[d]&&mine[d]}),on:!!s[t0]}});
   L.sort(function(a,b){return b.sh-a.sh||b.st-a.st});
-  if(!L.length&&FR.list)h+='<div class="muted small">'+esc(pkL('ما عندك أصدقاء بعد. أضف ID صديقك وابدأوا التحدي.','No friends yet. Add a friend’s ID to start.'))+'</div>';
-  h+=L.map(function(x){var nm=x.f.name||x.f.code;
-    return '<div class="fr"><div class="fav">'+esc(nm.trim().charAt(0).toUpperCase())+'</div><div class="grow"><div class="nm"><span class="t">'+esc(nm)+'</span>'+(x.on?'<i class="dot" title="'+esc(pkL('درس اليوم','Studied today'))+'"></i>':'')+'</div>'+
+  if(!L.length&&FR.list)h+='<div class="muted small">'+esc(pkL('ما عندك أصدقاء بعد. أرسل طلب صداقة لـ ID صديقك وابدأوا التحدي.','No friends yet. Send a friend request to a friend’s ID to start.'))+'</div>';
+  h+=L.map(function(x){var nm=frNm(x.f);
+    return '<div class="fr"><div class="fav">'+avInner(x.f.photo,nm)+'</div><div class="grow"><div class="nm"><span class="t">'+esc(nm)+'</span>'+(x.on?'<i class="dot" title="'+esc(pkL('درس اليوم','Studied today'))+'"></i>':'')+'</div>'+
      '<div class="small muted num" dir="ltr" style="text-align:start">'+fidFmt(x.f.code)+'</div>'+(nowAct(x.f.now_text,x.f.now_at?Date.parse(x.f.now_at):0)?'<div class="rdn">'+ic('timer',14)+'<span>'+esc(pkL('يقرا: ','Reading: ')+x.f.now_text)+' · '+agoTxt(Date.parse(x.f.now_at))+'</span></div>':'')+'</div>'+
      '<div class="fs"><b class="fl num" title="'+esc(pkL('ستريكه','Their streak'))+'">'+ic('flame',16)+x.st+'</b><b class="sh2 num" title="'+esc(pkL('ستريككم المشترك','Shared streak'))+'">'+ic('users',16)+x.sh+'</b></div>'+
      '<button type="button" class="x msgx" data-a="msgopen" data-id="'+esc(x.f.code)+'" aria-label="'+esc(pkL('رسالة','Message'))+'">'+ic('chat',18)+(+x.f.unread>0?'<b class="bd">'+(+x.f.unread>9?'9+':+x.f.unread)+'</b>':'')+'</button>'+
@@ -2997,6 +3158,11 @@ document.addEventListener('click',function(e){
   else if(a==='fidcopy'){var c=fidFmt(S.fid);if(!c)return;
     function ok(){showToast(pkL('تم نسخ الـ ID','ID copied'))}
     try{navigator.clipboard.writeText(S.fid).then(ok,function(){})}catch(x){}}
+  else if(a==='rqok'||a==='rqno'){var acc=a==='rqok';
+    FR.busy=true;paintFr();
+    frRpc('respond_request',{p_code:id,p_accept:acc}).then(function(){FR.ok=acc;FR.msg=acc?pkL('تمت إضافة الصديق ✓','Friend added ✓'):''}).catch(frErr).then(function(){frLoad()})}
+  else if(a==='rqcx'){FR.busy=true;paintFr();
+    frRpc('cancel_request',{p_code:id}).catch(frErr).then(function(){frLoad()})}
   else if(a==='frref'){FR.t=Date.now();FR.msg='';frLoad()}
   else if(a==='frrm'){
     askConfirm(pkL('تحذف هذا الصديق من القائمة؟','Remove this friend?'),{title:pkL('حذف صديق','Remove friend'),ok:pkL('حذف','Remove'),cancel:pkL('إلغاء','Cancel'),danger:true}).then(function(y){
@@ -3029,17 +3195,26 @@ document.addEventListener('submit',function(e){
     var kl=nowKinds().filter(function(x){return x[0]===k})[0][1],nt=kl+' · '+nm.slice(0,34)+' · '+(FR.nd||30)+' '+pkL('د','min');
     S.nowT=nt;S.nowAt=Date.now();FR.now='';FR.nsel='';FR.msg='';save();paintFr();
     frSync(true).then(function(){return frRpc('set_status',{p_text:nt})}).catch(frErr).then(function(){frLoad()})}
+  else if(id==='fNick'){e.preventDefault();
+    nkSet(CH.code,document.getElementById('nickIn').value.trim().slice(0,20));
+    CH.nk=false;CH.name=frNm(CH.f||{code:CH.code});chHeadPaint();paintFr()}
   else if(id==='fFr'){e.preventDefault();
     var code=document.getElementById('frIn').value.toUpperCase().replace(/[^A-Z0-9]/g,'');
     FR.ok=false;
     if(code.length!==8){FR.msg=pkL('الـ ID يتكوّن من 8 خانات (أحرف وأرقام).','The ID has 8 characters (letters and digits).');paintFr();return}
     if(code===S.fid){FR.msg=pkL('هذا الـ ID حقك أنت 😄','That’s your own ID');paintFr();return}
     FR.busy=true;FR.msg='';paintFr();
-    frSync(true).then(function(){return frRpc('add_friend',{p_code:code})}).then(function(r){
-      if(r==='ok'){FR.add='';FR.ok=true;FR.msg=pkL('تمت إضافة الصديق ✓','Friend added ✓')}
+    frSync(true).then(function(){return frRpc('send_friend_request',{p_code:code})}).then(function(r){
+      if(r==='sent'){FR.add='';FR.ok=true;FR.msg=pkL('تم إرسال الطلب ✓ بانتظار موافقته','Request sent ✓ waiting for approval')}
+      else if(r==='accepted'){FR.add='';FR.ok=true;FR.msg=pkL('صرتوا أصدقاء ✓ (هو كان مرسل لك طلب)','You’re now friends ✓ (they had sent you a request)')}
+      else if(r==='pending'){FR.add='';FR.ok=true;FR.msg=pkL('أرسلت له طلب من قبل، بانتظار موافقته','Request already sent, waiting for approval')}
+      else if(r==='already'){FR.add='';FR.msg=pkL('هذا صديقك بالفعل','Already your friend')}
       else if(r==='self')FR.msg=pkL('هذا الـ ID حقك أنت','That’s your own ID');
       else FR.msg=pkL('ما لقينا حساب بهذا الـ ID','No account with this ID')})
-     .catch(function(x){frErr(x)}).then(function(){frLoad()})}
+     .catch(function(x){var m=String(x&&x.message||'');
+       if(m==='rate_limited')FR.msg=pkL('محاولات كثيرة، انتظر شوي وجرب مرة ثانية','Too many attempts, wait a bit and try again');
+       else if(m==='too_many_requests')FR.msg=pkL('عندك طلبات معلّقة كثيرة، الغِ بعضها أولاً','Too many pending requests, cancel some first');
+       else frErr(x)}).then(function(){frLoad()})}
 });
 
 
@@ -3157,7 +3332,7 @@ setInterval(stkSelfWatch,15000);
 /* alert to me when a friend's subject time is up (polls the friends list quietly) */
 function stkFriendDone(f,fin){
   var k='stkfd:'+f.code+':'+fin.at;if(stkLs(k))return;stkLs(k,'1');
-  var nm=f.name||f.code,parts=String(fin.t).split(' · '),lbl=parts.length>2?parts[1]:fin.t,mine=setOf(myDays()),s=setOf(f.days),sh=runLen(function(d){return s[d]&&mine[d]});
+  var nm=frNm(f),parts=String(fin.t).split(' · '),lbl=parts.length>2?parts[1]:fin.t,mine=setOf(myDays()),s=setOf(f.days),sh=runLen(function(d){return s[d]&&mine[d]});
   var msg=pkL(nm+' خلّص وقت '+lbl+' 🎉',nm+' finished '+lbl+' 🎉')+(sh>0?' · '+pkL('ستريككم 🔥 '+sh,'shared 🔥 '+sh):'');
   if(document.hidden)notify(t('app'),msg,'fr-'+f.code);else{showToast(msg);try{navigator.vibrate&&navigator.vibrate(120)}catch(e){}}}
 function stkPoll(){
@@ -3172,7 +3347,8 @@ function stkPoll(){
       STK.seen[f.code]=cur;
       if(fin)stkFriendDone(f,fin)});
     stkUnread(r)
-  }).catch(function(){})}
+  }).catch(function(){});
+  frReqLoad().then(function(ch){if(ch&&S.view==='hub'&&UI.hubTab==='fr'&&!FR.busy&&!UI.sheet)paintFr()})}
 setInterval(stkPoll,60000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden){stkPoll();stkSelfWatch()}});
 document.addEventListener('change',function(e){if(e.target&&e.target.id==='stkFn'){UI.dirty=false;stkLs('stkfn',e.target.checked?'1':'0');if(e.target.checked&&window.Notification&&Notification.permission==='default')askPerm();if(!e.target.checked)stkUnpub()}});
@@ -3182,10 +3358,19 @@ document.addEventListener('change',function(e){if(e.target&&e.target.id==='stkFn
 var CH={code:'',name:'',msgs:[],seen:{},last:0,ru:0,busy:false,err:'',first:true};
 STK.un={};
 function chQuick(){return [pkL('كمّل! 🔥','Keep going! 🔥'),pkL('وين وصلت؟ ⏰','How far are you? ⏰'),pkL('أحسنت 👏','Well done 👏'),pkL('ذاكر! 💪','Study! 💪'),pkL('لا تنام 😴','Don’t sleep 😴')]}
+function chHeadInner(){
+  var h='<div class="chh"><button type="button" class="chip" data-a="chclose" aria-label="'+esc(pkL('إغلاق','Close'))+'">✕</button>'+
+    '<div class="fav">'+avInner(CH.photo,CH.name)+'</div>'+
+    '<div style="min-width:0;flex:1"><h2>'+esc(CH.name)+'</h2><div class="small muted">'+esc(pkL('الرسائل تنحذف تلقائياً بعد 7 أيام','Messages are deleted after 7 days'))+'</div></div>'+
+    '<button type="button" class="chip" data-a="chnick">'+esc(pkL('كنية','Nickname'))+'</button>'+
+    '<button type="button" class="chip" data-a="chblock">'+esc(pkL('حظر','Block'))+'</button></div>';
+  if(CH.nk)h+='<form id="fNick" class="frform" autocomplete="off"><input id="nickIn" maxlength="20" value="'+esc(nkGet(CH.code))+'" placeholder="'+esc(pkL('كنية تظهر لك أنت فقط','A nickname only you see'))+'" style="direction:auto;text-transform:none;letter-spacing:0"><button class="btn" type="submit">'+esc(pkL('حفظ','Save'))+'</button></form>';
+  return h}
+function chHeadPaint(){var e=document.getElementById('chHead');if(e)e.innerHTML=chHeadInner()}
 function chSheet(){
-  CH.msgs=[];CH.seen={};CH.last=0;CH.ru=0;CH.err='';CH.first=true;CH.busy=false;
+  CH.msgs=[];CH.seen={};CH.last=0;CH.ru=0;CH.err='';CH.first=true;CH.busy=false;CH.nk=false;
   setTimeout(chLoad,0);
-  return '<div class="chbox"><div class="chh"><div style="min-width:0"><h2>'+esc(CH.name)+'</h2><div class="small muted">'+esc(pkL('الرسائل تنحذف تلقائياً بعد 7 أيام','Messages are deleted after 7 days'))+'</div></div><button type="button" class="chip" data-a="chblock">'+esc(pkL('حظر','Block'))+'</button></div>'+
+  return '<div class="chbox"><div id="chHead">'+chHeadInner()+'</div>'+
    '<div class="chl" id="chList"></div>'+
    '<div class="chq">'+chQuick().map(function(q,i){return '<button type="button" class="chip" data-a="chq" data-id="'+i+'">'+esc(q)+'</button>'}).join('')+'</div>'+
    '<form id="fChat" class="chf" autocomplete="off"><input id="chIn" maxlength="120" placeholder="'+esc(pkL('اكتب رسالة قصيرة','Write a short message'))+'"><button class="btn" type="submit">'+esc(pkL('إرسال','Send'))+'</button></form></div>'}
@@ -3231,7 +3416,7 @@ function stkUnread(r){
     var n=+f.unread||0,pv=STK.un[f.code];
     if(UI.sheet==='chat'&&CH.code===f.code){STK.un[f.code]=n;return}
     if(pv!==undefined&&n>pv){
-      var msg='💬 '+(f.name||f.code)+(f.last?': '+f.last:'');
+      var msg='💬 '+frNm(f)+(f.last?': '+f.last:'');
       if(document.hidden)notify(t('app'),msg,'msg-'+f.code);else{showToast(msg);try{navigator.vibrate&&navigator.vibrate(120)}catch(e){}}}
     STK.un[f.code]=n});
   stkDotUpdate()}
@@ -3240,7 +3425,9 @@ document.addEventListener('click',function(e){
   var a=el.getAttribute('data-a'),id=el.getAttribute('data-id');
   if(a==='msgopen'){
     var f=(FR.list||[]).filter(function(x){return x.code===id})[0];
-    CH.code=id;CH.name=f?(f.name||f.code):id;openSheet('chat')}
+    CH.code=id;CH.f=f||{code:id};CH.name=frNm(CH.f);CH.photo=f?f.photo:'';openSheet('chat')}
+  else if(a==='chclose'){closeSheet()}
+  else if(a==='chnick'){CH.nk=!CH.nk;chHeadPaint();if(CH.nk){var ni=document.getElementById('nickIn');if(ni)ni.focus()}}
   else if(a==='chq'){chSend(chQuick()[+id],'cheer')}
   else if(a==='chblock'){
     askConfirm(pkL('تحظر هذا الصديق؟ تنحذف الصداقة والرسائل، وما يكدر يضيفك مرة ثانية.','Block this friend? The friendship and messages are removed and they can’t add you again.'),{title:pkL('حظر','Block'),ok:pkL('حظر','Block'),cancel:pkL('إلغاء','Cancel'),danger:true}).then(function(y){
@@ -3252,11 +3439,15 @@ document.addEventListener('submit',function(e){
   if(!e.target||e.target.id!=='fChat')return;e.preventDefault();
   var i=document.getElementById('chIn');if(!i)return;var v=i.value;i.value='';UI.dirty=false;chSend(v,'text');i.focus()});
 setInterval(function(){if(UI.sheet==='chat'&&!document.hidden&&USER)chLoad()},5000);
-loadSession().then(function(sess){var ok=sess&&getUsers()[sess];playIntro(false);if(ok)enterApp(sess);else showAuth()}).then(hideSplash,hideSplash);
+playIntro(false);   /* start the notebook intro at once; the session is read behind it */
+loadSession().then(function(sess){var ok=sess&&getUsers()[sess];if(ok)enterApp(sess);else showAuth()}).then(hideSplash,hideSplash);
 })();
 </script>
 <script>
-if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
+  if(window.AndroidBridge){/* the files are local inside the app: a service worker only adds start-up time and can serve a stale page */
+    navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})}).catch(function(){})}
+  else window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
 </script>
 </body>
 </html>
