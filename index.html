@@ -1541,7 +1541,7 @@ function sheetHtml(k){
     '<div class="sect" id="thBox"><h3>'+t('themeT')+'</h3><button type="button" class="pk thbtn" data-a="themepop" aria-haspopup="dialog">'+themeDots()+'<span class="thcur" id="thCur">'+esc(themeName())+'</span></button></div>'+
     '<div class="sect"><h3>'+pkL('اللغة','Language')+'</h3><select id="lgSel" class="thsel" aria-label="'+esc(pkL('اللغة','Language'))+'">'+[['ar','العربية'],['en','English']].map(function(o){return '<option value="'+o[0]+'"'+(S.lang===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></div>'+
     (S.lang==='ar'?'<div class="sect"><h3>الأرقام</h3><label class="row" style="gap:10px;font-weight:700"><input type="checkbox" id="aDig"'+(S.arDigits?' checked':'')+'>استخدم الأرقام العربية (٠١٢٣)</label></div>':'')+
-    fullSect()+installSect()+'<div class="sect"><h3>'+pkL('طباعة / PDF','Print / PDF')+'</h3><button type="button" class="btn ghost prbtn" data-a="print">'+ic('print',20)+'<span>'+pkL('طباعة الجدول أو حفظه PDF','Print schedule or save as PDF')+'</span></button><div class="small muted">'+pkL('من نافذة الطباعة اختر «حفظ بصيغة PDF».','In the print dialog choose “Save as PDF”.')+'</div></div>'+
+    remindSect()+fullSect()+installSect()+'<div class="sect"><h3>'+pkL('طباعة / PDF','Print / PDF')+'</h3><button type="button" class="btn ghost prbtn" data-a="print">'+ic('print',20)+'<span>'+pkL('طباعة الجدول أو حفظه PDF','Print schedule or save as PDF')+'</span></button><div class="small muted">'+pkL('من نافذة الطباعة اختر «حفظ بصيغة PDF».','In the print dialog choose “Save as PDF”.')+'</div></div>'+
     '<div class="sect"><h3>'+t('exportT')+'</h3><div class="prow2"><button type="button" class="btn ghost" data-a="xls" style="height:44px;font-size:calc(14px*var(--fs,1));padding-inline:16px">'+ic('table',18)+'&nbsp;'+t('xlsBtn')+'</button><button type="button" class="btn ghost" data-a="csvtasks" style="height:44px;font-size:calc(14px*var(--fs,1));padding-inline:16px">'+t('csvTasks')+'</button><button type="button" class="btn ghost" data-a="csvlog" style="height:44px;font-size:calc(14px*var(--fs,1));padding-inline:16px">'+t('csvLog')+'</button><button type="button" class="btn ghost" data-a="ics" style="height:44px;font-size:calc(14px*var(--fs,1));padding-inline:16px">'+pkL('تقويم ICS للمهام','Calendar (.ics)')+'</button></div></div>'+
     '<div class="sect"><h3>'+t('backupT')+'</h3><div class="prow2"><button type="button" class="btn ghost" data-a="export" style="height:44px;font-size:calc(14px*var(--fs,1));padding-inline:18px">'+t('expBtn')+'</button><label class="btn ghost" for="impFile">'+t('impBtn')+'</label><input type="file" id="impFile" accept="application/json,.json"></div><div class="small muted">'+t('backupHint')+'</div></div>'+
    
@@ -2154,7 +2154,7 @@ function todayShare(){
   S.subjects.forEach(function(x){if(partsTotal(x).h>0&&!(x.day&&x.day.date===today())&&remH(x)>0)tot+=remH(x)/days});
   return i?tot:0}
 /* ---------- Service Worker bridge + real notifications (steps 9-10) ---------- */
-var VAPID_PUBLIC='';   /* ضع مفتاح VAPID العام هنا عند ربط سيرفر Push، وإلا يبقى Push معطلًا */
+var VAPID_PUBLIC='BDwfrJ0MYH0e3XxOyyl2PIc0sVzs1NRzQM3fxla99AJf3BxXhhq41bQSeMqNtPA93qfIq2jaueauckjxtshO_98';   /* ضع مفتاح VAPID العام هنا عند ربط سيرفر Push، وإلا يبقى Push معطلًا */
 function swPost(m){try{if(!navigator.serviceWorker)return;navigator.serviceWorker.ready.then(function(r){if(r.active)r.active.postMessage(m)}).catch(function(){})}catch(e){}}
 function askPerm(cb){try{if(!window.Notification)return;
   if(Notification.permission==='granted'){cb&&cb();return}
@@ -2184,6 +2184,7 @@ function swTimer(){
   if(TM.running)swPost({type:'timer',endAt:TM.endAt,title:t('app'),body:TM.mode==='focus'?t('focusDone'):t('brkDone')});
   else swPost({type:'timer-cancel'})}
 function regDaily(){
+  pushSync();
   var on=!!(S.remind&&S.remind.on&&window.Notification&&Notification.permission==='granted');
   swPost({type:'remind-cfg',on:on,time:(S.remind&&S.remind.time)||'18:00',title:t('app'),body:remindBody()});
   try{if(!navigator.serviceWorker)return;navigator.serviceWorker.ready.then(function(r){
@@ -2191,11 +2192,20 @@ function regDaily(){
     if(on)r.periodicSync.register('daily-reminder',{minInterval:6*3600*1000}).catch(function(){});
     else r.periodicSync.unregister('daily-reminder').catch(function(){})}).catch(function(){})}catch(e){}}
 function u8(b){var p='='.repeat((4-b.length%4)%4),r=atob((b+p).replace(/-/g,'+').replace(/_/g,'/')),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o}
-function pushSub(){
-  if(!VAPID_PUBLIC||!window.PushManager||!navigator.serviceWorker)return;
-  navigator.serviceWorker.ready.then(function(r){
-    return r.pushManager.getSubscription().then(function(s){return s||r.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUBLIC)})})})
-  .then(function(s){window.dispatchEvent(new CustomEvent('mz-push',{detail:s.toJSON()}))}).catch(function(){})}
+function pushSync(){
+  try{
+    if(!VAPID_PUBLIC||!window.PushManager||!navigator.serviceWorker||!USER)return;
+    var on=!!(S.remind&&S.remind.on&&window.Notification&&Notification.permission==='granted');
+    navigator.serviceWorker.ready.then(function(r){
+      return r.pushManager.getSubscription().then(function(sub){
+        if(!on){if(sub&&sbOn())frRpc('delete_push',{p_endpoint:sub.endpoint}).catch(function(){});return}
+        return (sub||r.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUBLIC)})).then(function(s){
+          window.dispatchEvent(new CustomEvent('mz-push',{detail:s.toJSON()}));
+          if(!sbOn())return;
+          var tz='UTC';try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'}catch(x){}
+          return frRpc('save_push',{p_sub:s.toJSON(),p_time:(S.remind&&S.remind.time)||'18:00',p_tz:tz,p_title:t('app'),p_body:remindBody(),p_lang:S.lang})})})
+    }).catch(function(){})}catch(e){}}
+function pushSub(){pushSync()}
 document.addEventListener('visibilitychange',function(){if(document.hidden&&USER)regDaily()});
 function remindBody(){
   var x=S.remind&&S.remind.subj?subj(S.remind.subj):null,m=t('remindMsg')+(x?' · '+x.name:''),inf=planInfo();
@@ -2239,6 +2249,16 @@ function isFull(){return !!(document.fullscreenElement||document.webkitFullscree
 function enterFull(){var d=document.documentElement,f=d.requestFullscreen||d.webkitRequestFullscreen;if(!f)return;try{var r=f.call(d,{navigationUI:'hide'});if(r&&r.catch)r.catch(function(){})}catch(e){}}
 function exitFull(){var f=document.exitFullscreen||document.webkitExitFullscreen;if(!f)return;try{var r=f.call(document);if(r&&r.catch)r.catch(function(){})}catch(e){}}
 function fullLabel(){return isFull()?pkL('الخروج من الشاشة الكاملة','Exit full screen'):pkL('تشغيل الشاشة الكاملة','Enter full screen')}
+function remindSect(){
+  var R=S.remind||{on:false,time:'18:00',subj:''},hasN=!!window.Notification,perm=hasN?Notification.permission:'none',note='';
+  if(perm==='denied')note=pkL('الإشعارات مغلقة من إعدادات المتصفح، فعّلها من إعدادات الموقع ثم أعد تحميل الصفحة.','Notifications are blocked in browser settings; allow them in site settings and reload.');
+  else if(!hasN)note=pkL('متصفحك لا يدعم الإشعارات هنا. على الآيفون أضف التطبيق للشاشة الرئيسية وافتحه منها.','Notifications are not available here. On iPhone, add the app to your home screen and open it from there.');
+  return '<div class="sect"><h3>'+t('remindT')+'</h3>'+
+    '<label class="row" style="gap:10px;font-weight:700"><input type="checkbox" id="rOn"'+(R.on?' checked':'')+(hasN?'':' disabled')+'>'+t('remindOn')+'</label>'+
+    '<div class="g2"><label class="f">'+pkL('الوقت','Time')+'<input type="time" id="rTime" value="'+esc(R.time||'18:00')+'"></label>'+
+    '<label class="f">'+pkL('المادة','Subject')+'<select id="rSubj"><option value="">'+pkL('كل المواد','All subjects')+'</option>'+
+      S.subjects.map(function(x){return '<option value="'+esc(x.id)+'"'+(R.subj===x.id?' selected':'')+'>'+esc(x.name)+'</option>'}).join('')+'</select></label></div>'+
+    '<div class="small muted">'+t('remindHint')+'</div>'+(note?'<div class="small" style="color:var(--hot);font-weight:700">'+esc(note)+'</div>':'')+'</div>'}
 function fullSect(){
   var hd='<div class="sect"><h3>'+pkL('الشاشة الكاملة','Full screen')+'</h3>';
   if(!fsSupported())return hd+'<div class="small muted">'+pkL('متصفحك ما يدعم الشاشة الكاملة. ثبّت التطبيق على الشاشة الرئيسية حتى يفتح بدون شريط المتصفح.','Your browser does not support full screen. Install the app to your home screen to open it without the browser bar.')+'</div></div>';

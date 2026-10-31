@@ -1,6 +1,6 @@
 /* مذاكرتي — service worker: الواجهة تُخزَّن للعمل بدون إنترنت.
    غيّر رقم VER عند كل تحديث للتطبيق حتى يصل التحديث للمستخدمين. */
-const VER = 'mudhakirati-v9-43';
+const VER = 'mudhakirati-v9-44';
 const SHELL_CACHE = 'shell-' + VER;
 const FONT_CACHE = 'fonts-v1';
 const CFG_CACHE = 'cfg-v1';   /* إعدادات التذكير اليومي (تبقى بعد إيقاف الـ worker) */
@@ -115,6 +115,16 @@ self.addEventListener('message', e => {
       });
     }, ms);
   }
+});
+
+/* ---- Web Push: الإشعار من السيرفر حتى لو التطبيق مغلق ---- */
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (_) { d = { body: e.data ? e.data.text() : '' }; }
+  e.waitUntil(self.registration.showNotification(d.title || 'مذاكرتي', {
+    body: d.body || '', tag: 'daily-reminder', icon: 'icons/apple-touch-icon-180.png',
+    vibrate: [200, 100, 200], data: { url: d.url || './' }
+  }));
 });
 
 /* الضغط على الإشعار يفتح التطبيق أو يرجع له */
